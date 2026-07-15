@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-paper text-ink font-sans;
+    line-height: 1.5;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-serif;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  a {
+    color: inherit;
+  }
+
+  img, svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-gold ring-offset-2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .mono-label {
+    @apply font-mono text-xs uppercase tracking-stamp;
+  }
+
+  .eyebrow {
+    @apply mono-label flex items-center gap-2 text-gold/80;
+  }
+
+  .eyebrow::before {
+    content: '';
+    @apply block w-5 h-px bg-gold flex-shrink-0;
+  }
+
+  .stamp-ring {
+    @apply rounded-full border border-dashed border-gold/60 flex items-center justify-center;
+  }
+
+  .btn {
+    @apply inline-flex items-center gap-2 px-5 py-3 rounded-sm font-semibold text-sm
+           border border-transparent transition-all duration-150 no-underline select-none;
+  }
+
+  .btn-primary {
+    @apply bg-gold text-ink hover:bg-gold-light active:scale-[0.98];
+  }
+
+  .btn-ghost-light {
+    @apply border-paper/30 text-paper hover:border-paper/70 active:scale-[0.98];
+  }
+
+  .btn-ghost-dark {
+    @apply border-ink/25 text-ink hover:border-ink/60 active:scale-[0.98];
+  }
+
+  .section-eyebrow {
+    @apply mono-label text-rust mb-3 block;
+  }
+
+  .section-title {
+    @apply font-serif text-[clamp(1.6rem,3vw,2.25rem)] leading-tight font-semibold;
+  }
+
+  .filter-chip {
+    @apply mono-label px-3 py-1.5 rounded-sm border cursor-pointer transition-all duration-100
+           hover:border-leaf hover:text-leaf select-none;
+  }
+
+  .filter-chip-active {
+    @apply bg-leaf text-paper border-leaf;
+  }
+
+  .filter-chip-inactive {
+    @apply border-mist text-ink/60;
+  }
+}
+
+/* SVG map animations — must live outside @layer to be reachable from inline style */
+@keyframes route-flow {
+  from { stroke-dashoffset: 30; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes marker-pulse {
+  0%   { opacity: 0.5; transform: scale(1); }
+  100% { opacity: 0;   transform: scale(2.4); }
+}
+
+.map-pulse-ring {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
