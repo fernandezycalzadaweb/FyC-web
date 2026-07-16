@@ -44,11 +44,15 @@ export default function Footer() {
             <div>
               <p className="mono-label text-paper/30 text-[10px] mb-3">Legal</p>
               <ul className="space-y-2">
-                {['Aviso legal', 'Privacidad', 'Cookies'].map((label) => (
-                  <li key={label}>
-                    <a href="#" className="no-underline hover:text-paper/70 transition-colors">
+                {[
+                  { to: '/aviso-legal', label: 'Aviso legal' },
+                  { to: '/privacidad',  label: 'Privacidad' },
+                  { to: '/cookies',     label: 'Cookies' },
+                ].map(({ to, label }) => (
+                  <li key={to}>
+                    <Link to={to} className="no-underline hover:text-paper/70 transition-colors">
                       {label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

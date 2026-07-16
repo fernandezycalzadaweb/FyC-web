@@ -9,6 +9,9 @@ import Contacto from './pages/Contacto'
 import AdminLogin from './pages/admin/Login'
 import Dashboard from './pages/admin/Dashboard'
 import ProtectedRoute from './pages/admin/ProtectedRoute'
+import AvisoLegal from './pages/AvisoLegal'
+import Privacidad from './pages/Privacidad'
+import Cookies from './pages/Cookies'
 
 export default function App() {
   return (
@@ -37,6 +40,9 @@ export default function App() {
                   <Route path="/catalogo" element={<Catalogo />} />
                   <Route path="/nosotros" element={<Nosotros />} />
                   <Route path="/contacto" element={<Contacto />} />
+                  <Route path="/aviso-legal" element={<AvisoLegal />} />
+                  <Route path="/privacidad" element={<Privacidad />} />
+                  <Route path="/cookies" element={<Cookies />} />
                 </Routes>
               </main>
               <Footer />
