@@ -32,18 +32,16 @@ export default function Nav() {
     >
       <div className="max-w-[1180px] mx-auto px-6 flex items-center justify-between h-[62px]">
         {/* Marca */}
-        <Link to="/" className="flex items-center gap-3 no-underline" onClick={() => setOpen(false)}>
-          <span className="w-8 h-8 rounded-[5px] bg-leaf flex items-center justify-center text-paper font-serif font-bold text-sm select-none flex-shrink-0">
-            FC
-          </span>
-          <span>
-            <span className="font-serif font-semibold text-[16.5px] text-ink leading-none">
-              Fernández y Calzada
-            </span>
-            <span className="mono-label text-[9.5px] text-leaf-dark/75 block mt-0.5 tracking-[0.1em]">
-              Flor natural · Salamanca
-            </span>
-          </span>
+        <Link to="/" className="flex items-center no-underline" onClick={() => setOpen(false)}>
+          <img
+            src="/logo-fc.png"
+            alt="Fernández y Calzada S.L."
+            className="h-9 w-auto"
+            style={{
+              maxWidth: '155px',
+              filter: 'drop-shadow(0 1px 2px rgba(20,38,30,0.10))',
+            }}
+          />
         </Link>
 
         {/* Desktop nav */}

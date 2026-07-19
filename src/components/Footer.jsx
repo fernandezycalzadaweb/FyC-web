@@ -9,12 +9,25 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-8 mb-8">
           {/* Marca */}
           <div>
-            <Link to="/" className="flex items-center gap-2.5 no-underline mb-3">
-              <span className="w-7 h-7 rounded-[4px] bg-leaf flex items-center justify-center text-paper font-serif font-bold text-xs select-none flex-shrink-0">
-                FC
-              </span>
-              <span className="font-serif font-semibold text-sm text-paper">
-                Fernández y Calzada
+            <Link to="/" className="inline-flex no-underline mb-3 group">
+              {/*
+                El logo tiene texto oscuro sobre fondo transparente — no es visible sobre ink-deep.
+                Se presenta sobre un fondo paper con radio generoso, como una etiqueta física,
+                no como un parche técnico. El borde sutil lo integra con la estética del sitio.
+              */}
+              <span
+                className="inline-flex rounded-xl px-3 py-2 transition-opacity duration-150 group-hover:opacity-80"
+                style={{
+                  background: 'rgba(241,236,221,0.92)',
+                  boxShadow: '0 0 0 1px rgba(241,236,221,0.12)',
+                }}
+              >
+                <img
+                  src="/logo-fc.png"
+                  alt="Fernández y Calzada S.L."
+                  className="h-8 w-auto"
+                  style={{ maxWidth: '138px' }}
+                />
               </span>
             </Link>
             <p className="text-paper/40 leading-relaxed max-w-[22rem]">
