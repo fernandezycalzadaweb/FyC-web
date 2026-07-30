@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase, supabaseReady } from '../../lib/supabase'
 import { getSession, clearSession, canAccess, saveSession } from '../../lib/auth'
-import productosData, { CAT_STYLES, ORIGEN_LABEL } from '../../data/products'
+import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../../data/products'
 
 const MOCK_MENSAJES = [
   {
@@ -48,9 +48,21 @@ function StatCard({ label, value, sub }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [productos, setProductos] = useState(productosData.map((p) => ({ ...p })))
+  const [productos, setProductos] = useState(productosStatic.map((p) => ({ ...p })))
   const [tab, setTab] = useState('catalogo')
   const [session, setSession] = useState(null)
+
+  // Load productos from Supabase (all, including no disponibles, for admin view)
+  useEffect(() => {
+    if (!supabaseReady) return
+    supabase
+      .from('productos')
+      .select('*')
+      .order('categoria')
+      .then(({ data, error }) => {
+        if (!error && data?.length) setProductos(data)
+      })
+  }, [])
 
   useEffect(() => {
     if (supabaseReady) {
@@ -90,8 +102,25 @@ export default function Dashboard() {
     navigate('/admin/login')
   }
 
-  const toggleDisponible = (id) => {
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !p.disponible } : p)))
+  const toggleDisponible = async (id) => {
+    const producto = productos.find((p) => p.id === id)
+    if (!producto) return
+    const nuevoValor = !producto.disponible
+
+    // Optimistic update
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: nuevoValor } : p)))
+
+    if (supabaseReady) {
+      const { error } = await supabase
+        .from('productos')
+        .update({ disponible: nuevoValor })
+        .eq('id', id)
+
+      if (error) {
+        // Revert on failure
+        setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !nuevoValor } : p)))
+      }
+    }
   }
 
   const disponibles = productos.filter((p) => p.disponible).length
