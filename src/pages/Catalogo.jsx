@@ -47,7 +47,7 @@ function CatalogRow({ product }) {
 }
 
 export default function Catalogo() {
-  const [productos, setProductos] = useState(productosStatic)
+  const [productos, setProductos] = useState(productosStatic.filter((p) => p.disponible))
   const [filtro, setFiltro] = useState(TODOS)
 
   useEffect(() => {
@@ -55,6 +55,7 @@ export default function Catalogo() {
     supabase
       .from('productos')
       .select('*')
+      .eq('disponible', true)
       .order('categoria')
       .then(({ data, error }) => {
         if (!error && data?.length) setProductos(data)
