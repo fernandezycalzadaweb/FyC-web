@@ -5,7 +5,7 @@ import { supabase, supabaseReady } from '../lib/supabase'
 
 const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
-const WA_URL = 'https://wa.me/34923182222'
+const WA_URL = 'https://wa.me/34608615272'
 
 function origenStr(p) {
   return p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')

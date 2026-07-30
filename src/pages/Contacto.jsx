@@ -3,7 +3,7 @@ import Seo from '../components/Seo'
 import { supabase, supabaseReady } from '../lib/supabase'
 
 const INITIAL = { floristeria: '', telefono: '', mensaje: '' }
-const WA_URL = 'https://wa.me/34923182222'
+const WA_URL = 'https://wa.me/34608615272'
 
 export default function Contacto() {
   const [form, setForm] = useState(INITIAL)

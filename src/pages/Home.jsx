@@ -7,7 +7,7 @@ import { supabase, supabaseReady } from '../lib/supabase'
 // Preview: 8 nombres representativos de todas las categorías
 const PREVIEW_NAMES = ['Hortensia rosa', 'Hortensia azul', 'Tulipán', 'Peonía', 'Rosa', 'Eucalipto', 'Poinsetia', 'Envoltorios']
 
-const WA_URL = 'https://wa.me/34923182222'
+const WA_URL = 'https://wa.me/34608615272'
 
 function origenStr(p) {
   return p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')
