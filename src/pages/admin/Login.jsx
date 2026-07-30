@@ -39,7 +39,7 @@ export default function Login() {
         // Session stored in Supabase Auth — no need to persist manually
         // but we cache name+role so Dashboard can read it synchronously
         saveSession({ email: data.user.email, name: profile.nombre ?? data.user.email, role: profile.role })
-        nav('/admin/dashboard')
+        nav('/admin')
       } else {
         const acc = MOCK_ACCOUNTS.find((a) => a.email === email && a.password === password)
         if (!acc) {
@@ -47,7 +47,7 @@ export default function Login() {
           return
         }
         saveSession({ email: acc.email, name: acc.name, role: acc.role })
-        nav('/admin/dashboard')
+        nav('/admin')
       }
     } finally {
       setLoading(false)
