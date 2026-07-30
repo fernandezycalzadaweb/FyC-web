@@ -9,11 +9,28 @@ export const ORIGEN_LABEL = {
   Nacional: 'España',
 }
 
-export const CATEGORIA_ICON = {
-  'Flor cortada': '✿',
-  Verdes: '❧',
-  Plantas: '◉',
-  Accesorios: '◈',
+// Estilos por categoría — pill suave (sin bloques grandes de color)
+export const CAT_STYLES = {
+  'Flor cortada': {
+    color: '#E0566E',
+    pillBg: 'rgba(224,86,110,0.12)',
+    placeholderBg: 'rgba(224,86,110,0.1)',
+  },
+  Verdes: {
+    color: '#4A7A34',
+    pillBg: 'rgba(74,122,52,0.12)',
+    placeholderBg: 'rgba(74,122,52,0.1)',
+  },
+  Plantas: {
+    color: '#8A9A63',
+    pillBg: 'rgba(138,154,99,0.14)',
+    placeholderBg: 'rgba(138,154,99,0.1)',
+  },
+  Accesorios: {
+    color: '#C98A1F',
+    pillBg: 'rgba(201,138,31,0.14)',
+    placeholderBg: 'rgba(201,138,31,0.1)',
+  },
 }
 
 const productos = [
@@ -68,19 +85,28 @@ const productos = [
   },
   {
     id: 'col-07',
-    nombre: 'Hortensia (cortada)',
+    nombre: 'Hortensia rosa',
     categoria: 'Flor cortada',
     origen: ['Colombia', 'Ecuador'],
-    descripcion: 'Hortensia de corte con cabezas grandes y colores variados.',
+    descripcion: 'Cabeza grande, pétalos compactos. Tono rosa intenso muy solicitado.',
     disponible: true,
+    imagen: '/images/productos/hortensia-rosa.jpg',
   },
-
+  {
+    id: 'col-08',
+    nombre: 'Hortensia azul',
+    categoria: 'Flor cortada',
+    origen: ['Colombia', 'Ecuador'],
+    descripcion: 'El azul de la hortensia en su versión más pura. Especialidad de temporada.',
+    disponible: true,
+    imagen: '/images/productos/hortensia-azul.jpg',
+  },
   {
     id: 'ecu-01',
     nombre: 'Rosa de tallo extra largo',
     categoria: 'Flor cortada',
     origen: ['Ecuador'],
-    descripcion: 'Especialidad ecuatoriana: tallo de 80–100 cm y cabeza XL. Sinónimo de Ecuador en floristería nupcial.',
+    descripcion: 'Tallo de 80–100 cm y cabeza XL. Especialidad ecuatoriana para nupcial.',
     disponible: true,
   },
 
@@ -130,7 +156,7 @@ const productos = [
     nombre: 'Solidago',
     categoria: 'Flor cortada',
     origen: ['Holanda', 'Nacional'],
-    descripcion: 'Relleno clásico en amarillo dorado. Disponible de temporada en origen nacional.',
+    descripcion: 'Relleno clásico en amarillo dorado. Disponible de temporada en nacional.',
     disponible: true,
   },
   {
@@ -146,7 +172,7 @@ const productos = [
     nombre: 'Statice',
     categoria: 'Flor cortada',
     origen: ['Holanda', 'Nacional'],
-    descripcion: 'Flores pequeñas, colores vivos, se seca muy bien conservando el color.',
+    descripcion: 'Flores pequeñas, colores vivos, se seca bien conservando el color.',
     disponible: true,
   },
   {

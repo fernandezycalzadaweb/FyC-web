@@ -2,11 +2,25 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase, supabaseReady } from '../../lib/supabase'
 import { getSession, clearSession, hasPerm, PERMISSIONS } from '../../lib/auth'
-import productosData from '../../data/products'
+import productosData, { CAT_STYLES, ORIGEN_LABEL } from '../../data/products'
 
 const MOCK_MENSAJES = [
-  { id: 1, nombre: 'María García', floristeria: 'Flores del Centro', email: 'maria@floresdel.com', mensaje: 'Buenos días, me gustaría saber disponibilidad de peonías para mayo.', created_at: new Date(Date.now() - 3600000).toISOString(), leido: false },
-  { id: 2, nombre: 'Juan López', floristeria: 'El Ramo', email: 'juan@elramo.es', mensaje: 'Consulta de precios para pedido semanal de rosas y alstroemerias.', created_at: new Date(Date.now() - 86400000).toISOString(), leido: true },
+  {
+    id: 1,
+    floristeria: 'Flores del Centro',
+    email: 'maria@floresdel.com',
+    mensaje: 'Buenos días, me gustaría saber disponibilidad de peonías para mayo.',
+    created_at: new Date(Date.now() - 3600000).toISOString(),
+    leido: false,
+  },
+  {
+    id: 2,
+    floristeria: 'El Ramo',
+    email: 'juan@elramo.es',
+    mensaje: 'Consulta de precios para pedido semanal de rosas y alstroemerias.',
+    created_at: new Date(Date.now() - 86400000).toISOString(),
+    leido: true,
+  },
 ]
 
 const MOCK_ANALYTICS = [
@@ -16,12 +30,24 @@ const MOCK_ANALYTICS = [
   { pagina: '/nosotros', visitas: 21 },
 ]
 
+const L = { color: '#6E6E73' }
+const ROW = { borderBottom: '1px solid rgba(0,0,0,0.08)' }
+
 function StatCard({ label, value, sub }) {
   return (
-    <div className="bg-card border border-mist rounded-[4px] p-5">
-      <p className="mono-label text-[9.5px] text-leaf-dark/60 mb-2">{label}</p>
-      <p className="font-serif text-[32px] font-semibold leading-none text-ink">{value}</p>
-      {sub && <p className="text-[12px] text-ink/45 mt-1.5">{sub}</p>}
+    <div
+      style={{
+        background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 16, padding: '20px 22px',
+      }}
+    >
+      <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73', margin: '0 0 8px' }}>
+        {label}
+      </p>
+      <p style={{ fontSize: 32, fontWeight: 800, letterSpacing: '-0.02em', margin: 0, lineHeight: 1 }}>
+        {value}
+      </p>
+      {sub && <p style={{ fontSize: 12, color: '#6E6E73', marginTop: 6, marginBottom: 0 }}>{sub}</p>}
     </div>
   )
 }
@@ -52,14 +78,12 @@ export default function Dashboard() {
   }
 
   const toggleDisponible = (id) => {
-    setProductos((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, disponible: !p.disponible } : p))
-    )
-    // TODO: supabase.from('productos').update({ disponible }).eq('id', id)
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !p.disponible } : p)))
   }
 
   const disponibles = productos.filter((p) => p.disponible).length
   const noLeidos = MOCK_MENSAJES.filter((m) => !m.leido).length
+  const totalVisitas = MOCK_ANALYTICS.reduce((a, p) => a + p.visitas, 0)
 
   const TABS = [
     { id: 'catalogo', label: 'Catálogo', show: hasPerm(session, PERMISSIONS.CATALOGO_EDIT) },
@@ -68,28 +92,52 @@ export default function Dashboard() {
   ].filter((t) => t.show)
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div style={{ minHeight: '100vh', background: '#FBFBFD' }}>
       {/* Topbar */}
-      <div className="bg-ink-deep text-paper border-b border-paper/10">
-        <div className="max-w-[1180px] mx-auto px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-[4px] bg-leaf flex items-center justify-center text-paper font-serif font-bold text-xs select-none flex-shrink-0">
+      <div style={{ background: '#fff', borderBottom: '1px solid rgba(0,0,0,0.08)', position: 'sticky', top: 0, zIndex: 40 }}>
+        <div
+          style={{
+            maxWidth: 1120, margin: '0 auto', padding: '0 24px',
+            height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span
+              style={{
+                width: 24, height: 24, borderRadius: 7,
+                background: '#1D1D1F', color: '#fff',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 11, fontWeight: 800, flexShrink: 0,
+              }}
+            >
               FC
             </span>
-            <span className="font-serif text-[14px] text-paper/80">Panel privado</span>
+            <span style={{ fontWeight: 700, fontSize: 14, color: '#1D1D1F' }}>Panel privado</span>
             {session?.name && (
-              <span className="mono-label text-[9px] text-paper/30 px-2 py-0.5 rounded-sm border border-paper/10">
+              <span
+                style={{
+                  fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100,
+                  background: 'rgba(0,0,0,0.05)', color: '#6E6E73',
+                }}
+              >
                 {session.name}
               </span>
             )}
           </div>
-          <div className="flex items-center gap-4">
-            <Link to="/" className="text-[12.5px] text-paper/40 hover:text-paper/70 no-underline transition-colors">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+            <Link
+              to="/"
+              style={{ fontSize: 12.5, color: '#6E6E73', textDecoration: 'none', transition: 'color 0.1s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#1D1D1F')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}
+            >
               Ver web →
             </Link>
             <button
               onClick={handleLogout}
-              className="text-[12.5px] text-paper/40 hover:text-paper/70 transition-colors"
+              style={{ background: 'none', border: 'none', fontSize: 12.5, color: '#6E6E73', cursor: 'pointer', padding: 0, transition: 'color 0.1s' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#1D1D1F')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}
             >
               Salir
             </button>
@@ -97,31 +145,39 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="max-w-[1180px] mx-auto px-6 py-8">
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '36px 24px 80px' }}>
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 36 }}>
           <StatCard label="Productos totales" value={productos.length} sub="en catálogo" />
           <StatCard label="Disponibles" value={disponibles} sub={`de ${productos.length}`} />
           {hasPerm(session, PERMISSIONS.MENSAJES_VIEW) && (
             <StatCard label="Mensajes nuevos" value={noLeidos} sub="sin leer" />
           )}
           {hasPerm(session, PERMISSIONS.METRICAS_VIEW) && (
-            <StatCard label="Visitas (mock)" value={MOCK_ANALYTICS.reduce((a, p) => a + p.visitas, 0)} sub="últimos 30 días" />
+            <StatCard label="Visitas (mock)" value={totalVisitas} sub="últimos 30 días" />
           )}
         </div>
 
         {/* Tabs */}
         {TABS.length > 0 && (
-          <div className="flex gap-0 border-b border-mist mb-6">
+          <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(0,0,0,0.08)', marginBottom: 28 }}>
             {TABS.map(({ id, label }) => (
               <button
                 key={id}
                 onClick={() => setTab(id)}
-                className={`px-5 py-2.5 text-[13px] font-medium border-b-2 -mb-px transition-colors ${
-                  tab === id
-                    ? 'border-leaf text-leaf'
-                    : 'border-transparent text-ink/50 hover:text-ink/80'
-                }`}
+                style={{
+                  padding: '10px 20px',
+                  fontSize: 13, fontWeight: 600,
+                  borderBottom: `2px solid ${tab === id ? '#1D1D1F' : 'transparent'}`,
+                  marginBottom: -1,
+                  color: tab === id ? '#1D1D1F' : '#6E6E73',
+                  background: 'none', border: 'none',
+                  borderBottomWidth: 2,
+                  borderBottomStyle: 'solid',
+                  borderBottomColor: tab === id ? '#1D1D1F' : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'color 0.1s',
+                }}
               >
                 {label}
               </button>
@@ -129,125 +185,154 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── TAB: Catálogo ───────────────────────────────────────── */}
+        {/* ── TAB: Catálogo ─────────────────────────────────────── */}
         {tab === 'catalogo' && hasPerm(session, PERMISSIONS.CATALOGO_EDIT) && (
           <div>
-            <div className="overflow-x-auto rounded-[4px] border border-mist">
-              <table className="w-full text-[13px]">
+            <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="bg-card border-b border-mist">
-                    <th className="text-left px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal">Producto</th>
-                    <th className="text-left px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal hidden sm:table-cell">Categoría</th>
-                    <th className="text-left px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal hidden md:table-cell">Origen</th>
-                    <th className="text-center px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal">Disponible</th>
+                  <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                    {['Producto', 'Categoría', 'Origen', 'Disponible'].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: h === 'Disponible' ? 'center' : 'left',
+                          padding: '12px 16px',
+                          fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                          letterSpacing: '0.06em', color: '#6E6E73', fontStyle: 'normal',
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {productos.map((p, i) => (
-                    <tr key={p.id} className={`border-b border-mist/60 hover:bg-card/50 transition-colors ${i === productos.length - 1 ? 'border-b-0' : ''}`}>
-                      <td className="px-4 py-3 font-medium text-ink">{p.nombre}</td>
-                      <td className="px-4 py-3 text-ink/60 hidden sm:table-cell">
-                        <span className="mono-label text-[9px] px-2 py-0.5 rounded-sm bg-mist">{p.categoria}</span>
-                      </td>
-                      <td className="px-4 py-3 text-ink/60 hidden md:table-cell">
-                        {p.origen.join(' · ')}
-                      </td>
-                      <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => toggleDisponible(p.id)}
-                          className={`relative w-9 h-5 rounded-full transition-colors duration-150 ${
-                            p.disponible ? 'bg-leaf' : 'bg-mist'
-                          }`}
-                          aria-label={p.disponible ? 'Marcar como no disponible' : 'Marcar como disponible'}
-                        >
+                  {productos.map((p, i) => {
+                    const s = CAT_STYLES[p.categoria]
+                    return (
+                      <tr
+                        key={p.id}
+                        style={i < productos.length - 1 ? ROW : undefined}
+                        onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.015)')}
+                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      >
+                        <td style={{ padding: '14px 16px', fontWeight: 600 }}>{p.nombre}</td>
+                        <td style={{ padding: '14px 16px' }}>
                           <span
-                            className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-150 ${
-                              p.disponible ? 'translate-x-4' : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
+                            style={{
+                              fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 100,
+                              background: s.pillBg, color: s.color,
+                            }}
+                          >
+                            {p.categoria}
+                          </span>
+                        </td>
+                        <td style={{ padding: '14px 16px', color: '#6E6E73' }}>
+                          {p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' · ')}
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                          <button
+                            onClick={() => toggleDisponible(p.id)}
+                            style={{
+                              position: 'relative', width: 36, height: 20, borderRadius: 100,
+                              background: p.disponible ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
+                              border: 'none', cursor: 'pointer', transition: 'background 0.15s',
+                              flexShrink: 0,
+                            }}
+                            aria-label={p.disponible ? 'Marcar como no disponible' : 'Marcar como disponible'}
+                          >
+                            <span
+                              style={{
+                                position: 'absolute', top: 2, left: 2,
+                                width: 16, height: 16, borderRadius: '50%',
+                                background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                                transition: 'transform 0.15s',
+                                transform: p.disponible ? 'translateX(16px)' : 'translateX(0)',
+                              }}
+                            />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize: 10.5, color: '#6E6E73', marginTop: 10, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+              Los cambios se guardarán en Supabase cuando esté conectado.
+            </p>
+          </div>
+        )}
+
+        {/* ── TAB: Mensajes ─────────────────────────────────────── */}
+        {tab === 'mensajes' && hasPerm(session, PERMISSIONS.MENSAJES_VIEW) && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {MOCK_MENSAJES.map((m) => (
+              <div
+                key={m.id}
+                style={{
+                  borderRadius: 16, padding: '20px 22px',
+                  background: '#fff',
+                  border: m.leido ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(140,191,63,0.28)',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
+                  <div>
+                    <p style={{ fontWeight: 600, fontSize: 14, margin: '0 0 2px' }}>
+                      {m.floristeria}
+                    </p>
+                    <a href={`mailto:${m.email}`} style={{ fontSize: 12.5, color: '#6E6E73' }}>
+                      {m.email}
+                    </a>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                    {!m.leido && (
+                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: '#8CBF3F', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Nuevo
+                      </span>
+                    )}
+                    <span style={{ fontSize: 10, ...L, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 600 }}>
+                      {new Date(m.created_at).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+                <p style={{ fontSize: 13.5, color: '#6E6E73', margin: 0, lineHeight: 1.6 }}>{m.mensaje}</p>
+              </div>
+            ))}
+            <p style={{ fontSize: 10.5, color: '#6E6E73', marginTop: 4, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+              Datos de muestra — los mensajes reales se cargarán desde Supabase.
+            </p>
+          </div>
+        )}
+
+        {/* ── TAB: Métricas ─────────────────────────────────────── */}
+        {tab === 'metricas' && hasPerm(session, PERMISSIONS.METRICAS_VIEW) && (
+          <div>
+            <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Página</th>
+                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Visitas (30 d)</th>
+                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {MOCK_ANALYTICS.map(({ pagina, visitas }, i) => (
+                    <tr key={pagina} style={i < MOCK_ANALYTICS.length - 1 ? ROW : undefined}>
+                      <td style={{ padding: '13px 16px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
+                      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700 }}>{visitas}</td>
+                      <td style={{ padding: '13px 16px', textAlign: 'right', color: '#6E6E73' }}>
+                        {((visitas / totalVisitas) * 100).toFixed(1)}%
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <p className="mono-label text-[9.5px] text-ink/35 mt-3">
-              Los cambios de disponibilidad se guardarán en Supabase cuando esté conectado.
-            </p>
-          </div>
-        )}
-
-        {/* ── TAB: Mensajes ───────────────────────────────────────── */}
-        {tab === 'mensajes' && hasPerm(session, PERMISSIONS.MENSAJES_VIEW) && (
-          <div className="flex flex-col gap-3">
-            {MOCK_MENSAJES.map((m) => (
-              <div
-                key={m.id}
-                className={`rounded-[4px] border p-5 ${m.leido ? 'border-mist bg-card/50' : 'border-leaf/25 bg-leaf/5'}`}
-              >
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
-                  <div>
-                    <p className="font-medium text-[14px]">
-                      {m.nombre}
-                      {m.floristeria && (
-                        <span className="text-ink/50 font-normal"> · {m.floristeria}</span>
-                      )}
-                    </p>
-                    <a href={`mailto:${m.email}`} className="text-[12.5px] text-leaf no-underline hover:underline">
-                      {m.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    {!m.leido && (
-                      <span className="mono-label text-[9px] bg-leaf text-paper px-2 py-0.5 rounded-sm">
-                        NUEVO
-                      </span>
-                    )}
-                    <span className="mono-label text-[9px] text-ink/35">
-                      {new Date(m.created_at).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-                <p className="text-[13.5px] text-ink/70 leading-relaxed">{m.mensaje}</p>
-              </div>
-            ))}
-            <p className="mono-label text-[9.5px] text-ink/35 mt-1">
-              Datos de muestra — los mensajes reales se cargarán desde Supabase.
-            </p>
-          </div>
-        )}
-
-        {/* ── TAB: Métricas ───────────────────────────────────────── */}
-        {tab === 'metricas' && hasPerm(session, PERMISSIONS.METRICAS_VIEW) && (
-          <div>
-            <div className="overflow-x-auto rounded-[4px] border border-mist">
-              <table className="w-full text-[13px]">
-                <thead>
-                  <tr className="bg-card border-b border-mist">
-                    <th className="text-left px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal">Página</th>
-                    <th className="text-right px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal">Visitas (30 d)</th>
-                    <th className="text-right px-4 py-3 mono-label text-[9.5px] text-leaf-dark/60 font-normal hidden sm:table-cell">%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    const total = MOCK_ANALYTICS.reduce((a, p) => a + p.visitas, 0)
-                    return MOCK_ANALYTICS.map(({ pagina, visitas }, i) => (
-                      <tr key={pagina} className={`border-b border-mist/60 ${i === MOCK_ANALYTICS.length - 1 ? 'border-b-0' : ''}`}>
-                        <td className="px-4 py-3 font-mono text-[12.5px] text-ink">{pagina}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-ink">{visitas}</td>
-                        <td className="px-4 py-3 text-right text-ink/50 hidden sm:table-cell">
-                          {((visitas / total) * 100).toFixed(1)}%
-                        </td>
-                      </tr>
-                    ))
-                  })()}
-                </tbody>
-              </table>
-            </div>
-            <p className="mono-label text-[9.5px] text-ink/35 mt-3">
-              Datos de muestra — las métricas reales se registrarán en la tabla analytics_visitas de Supabase.
+            <p style={{ fontSize: 10.5, color: '#6E6E73', marginTop: 10, textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>
+              Datos de muestra — las métricas reales se registrarán en Supabase.
             </p>
           </div>
         )}

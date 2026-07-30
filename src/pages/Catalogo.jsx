@@ -1,209 +1,138 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import Seo from '../components/Seo'
-import productos, { CATEGORIAS, ORIGENES, ORIGEN_LABEL } from '../data/products'
+import productos, { CATEGORIAS, CAT_STYLES, ORIGEN_LABEL } from '../data/products'
 
-const ORIGEN_FLAG = {
-  Colombia: 'CO',
-  Ecuador: 'EC',
-  Holanda: 'NL',
-  Nacional: 'ES',
+const TODOS = 'Todas'
+const FILTROS = [TODOS, ...CATEGORIAS]
+
+const WA_URL = 'https://wa.me/34923182222'
+
+function origenStr(p) {
+  return p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')
 }
 
-function FilterChip({ label, active, onClick }) {
+function CatalogRow({ product }) {
+  const s = CAT_STYLES[product.categoria]
+  const [imgOk, setImgOk] = useState(true)
+
   return (
-    <button
-      onClick={onClick}
-      className={`filter-chip ${active ? 'filter-chip-active' : 'filter-chip-inactive'}`}
+    <div
+      style={{
+        display: 'flex', alignItems: 'center', gap: 16,
+        padding: '18px 0', borderBottom: '1px solid rgba(0,0,0,0.08)',
+      }}
     >
-      {label}
-    </button>
-  )
-}
+      {product.imagen && imgOk ? (
+        <img
+          src={product.imagen}
+          alt={product.nombre}
+          onError={() => setImgOk(false)}
+          style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }}
+        />
+      ) : (
+        <div
+          style={{
+            width: 52, height: 52, borderRadius: 12, flexShrink: 0,
+            background: s.placeholderBg,
+          }}
+        />
+      )}
 
-function ProductCard({ product }) {
-  const origenChips = product.origen.map((o) => ORIGEN_FLAG[o] || o)
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 600, fontSize: 15.5 }}>{product.nombre}</div>
+        <div style={{ fontSize: 13, color: '#6E6E73', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {product.descripcion}
+        </div>
+      </div>
 
-  return (
-    <article className="group bg-card border border-mist rounded-[3px] overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_-14px_rgba(20,38,30,0.3)]">
-      {/* Placeholder foto */}
-      <div
-        className="relative h-[148px] flex items-end p-3"
+      <span style={{ fontSize: 13, color: '#6E6E73', flexShrink: 0 }} className="hidden md:block">
+        {origenStr(product)}
+      </span>
+
+      <span
         style={{
-          background:
-            'repeating-linear-gradient(45deg, rgba(20,38,30,0.04) 0 2px, transparent 2px 14px), linear-gradient(160deg, #DCE3D8, #EDE9D9)',
+          fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 100,
+          background: s.pillBg, color: s.color,
+          minWidth: 96, textAlign: 'center', flexShrink: 0,
         }}
       >
-        <span className="mono-label text-[9px] text-ink/30 bg-paper/60 px-2 py-1 rounded-sm">
-          FOTO PENDIENTE
-        </span>
-
-        {/* Stamp origen */}
-        <span
-          className="absolute top-2.5 right-2.5 w-[42px] h-[42px] rounded-full border border-dashed border-rust/65 bg-paper/85 flex items-center justify-center text-rust font-mono font-semibold text-[8.5px] leading-tight text-center"
-          style={{ transform: 'rotate(-7deg)' }}
-        >
-          {ORIGEN_FLAG[product.origen[0]] || '—'}
-        </span>
-      </div>
-
-      <div className="p-4 flex flex-col gap-2.5 flex-1">
-        <div>
-          <p className="mono-label text-[9.5px] text-rust mb-1">{product.categoria}</p>
-          <h3 className="font-serif text-[17px] font-semibold leading-tight">{product.nombre}</h3>
-        </div>
-
-        {product.descripcion && (
-          <p className="text-[12.5px] text-ink/55 leading-relaxed flex-1">{product.descripcion}</p>
-        )}
-
-        <div className="border-t border-dashed border-mist pt-2.5 flex flex-wrap justify-between items-center gap-1.5">
-          <div className="flex gap-1">
-            {origenChips.map((flag) => (
-              <span
-                key={flag}
-                className="mono-label text-[9px] px-1.5 py-0.5 rounded-sm bg-mist text-leaf-dark"
-              >
-                {flag}
-              </span>
-            ))}
-          </div>
-          <span
-            className={`mono-label text-[9px] px-2 py-0.5 rounded-sm ${
-              product.disponible ? 'bg-leaf/10 text-leaf-dark' : 'bg-mist/50 text-ink/35'
-            }`}
-          >
-            {product.disponible ? 'Disponible' : 'Temporada'}
-          </span>
-        </div>
-      </div>
-    </article>
+        {product.categoria}
+      </span>
+    </div>
   )
 }
 
 export default function Catalogo() {
-  const [catFilter, setCatFilter] = useState(null)
-  const [origenFilter, setOrigenFilter] = useState(null)
+  const [filtro, setFiltro] = useState(TODOS)
 
-  const filtered = useMemo(() => {
-    return productos.filter((p) => {
-      const catOk = !catFilter || p.categoria === catFilter
-      const origOk = !origenFilter || p.origen.includes(origenFilter)
-      return catOk && origOk
-    })
-  }, [catFilter, origenFilter])
-
-  const schema = {
-    '@context': 'https://schema.org',
-    '@type': 'ItemList',
-    name: 'Catálogo de flor y planta — Fernández y Calzada',
-    description:
-      'Listado de flor cortada, verdes, plantas y accesorios disponibles en Fernández y Calzada S.L.',
-    numberOfItems: productos.length,
-    itemListElement: productos.map((p, i) => ({
-      '@type': 'ListItem',
-      position: i + 1,
-      name: p.nombre,
-    })),
-  }
+  const lista = filtro === TODOS
+    ? productos
+    : productos.filter((p) => p.categoria === filtro)
 
   return (
     <>
-      <Seo
-        title="Catálogo"
-        description="Catálogo completo de flor cortada (Colombia, Ecuador, Holanda), verdes, plantas y accesorios de floristería. Mayoristas en Salamanca."
-        path="/catalogo"
-        schema={schema}
-      />
+      <Seo path="/catalogo" />
+      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '72px 24px 96px' }}>
 
-      {/* Cabecera */}
-      <div className="bg-ink-deep text-paper py-12 md:py-16">
-        <div className="max-w-[1180px] mx-auto px-6">
-          <span className="eyebrow text-[11px] text-gold/70 mb-4">Catálogo completo</span>
+        {/* Header */}
+        <div style={{ marginBottom: 40 }}>
           <h1
-            className="font-serif font-semibold text-paper leading-tight max-w-[26ch]"
-            style={{ fontSize: 'clamp(1.8rem, 4vw, 2.6rem)' }}
+            style={{
+              fontSize: 'clamp(30px, 4.5vw, 52px)', fontWeight: 800,
+              letterSpacing: '-0.025em', margin: '0 0 8px',
+            }}
           >
-            Flor cortada, planta y accesorios de floristería
+            Catálogo
           </h1>
-          <p className="text-paper/50 mt-3 max-w-[52ch] text-[15px]">
-            Selección actualizada de lo que trabajamos. Fotos y fichas detalladas disponibles próximamente.
+          <p style={{ fontSize: 16, color: '#6E6E73', margin: 0 }}>
+            {productos.length} variedades disponibles · Consulta disponibilidad semanal
           </p>
         </div>
-      </div>
 
-      <div className="max-w-[1180px] mx-auto px-6 py-10">
-        {/* Filtros */}
-        <div className="bg-card border border-mist rounded-[4px] p-4 mb-8 flex flex-col gap-4">
-          {/* Categoría */}
-          <div>
-            <p className="mono-label text-[9.5px] text-leaf-dark/60 mb-2.5">Categoría</p>
-            <div className="flex flex-wrap gap-2">
-              <FilterChip
-                label="Todas"
-                active={!catFilter}
-                onClick={() => setCatFilter(null)}
-              />
-              {CATEGORIAS.map((c) => (
-                <FilterChip
-                  key={c}
-                  label={c}
-                  active={catFilter === c}
-                  onClick={() => setCatFilter(catFilter === c ? null : c)}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* Origen */}
-          <div className="pt-3 border-t border-mist">
-            <p className="mono-label text-[9.5px] text-leaf-dark/60 mb-2.5">País de origen</p>
-            <div className="flex flex-wrap gap-2">
-              <FilterChip
-                label="Todos los orígenes"
-                active={!origenFilter}
-                onClick={() => setOrigenFilter(null)}
-              />
-              {ORIGENES.map((o) => (
-                <FilterChip
-                  key={o}
-                  label={`${ORIGEN_FLAG[o]} · ${ORIGEN_LABEL[o]}`}
-                  active={origenFilter === o}
-                  onClick={() => setOrigenFilter(origenFilter === o ? null : o)}
-                />
-              ))}
-            </div>
-          </div>
+        {/* Filter chips */}
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 32 }}>
+          {FILTROS.map((f) => (
+            <button
+              key={f}
+              onClick={() => setFiltro(f)}
+              className={`chip${filtro === f ? ' chip-active' : ''}`}
+            >
+              {f}
+            </button>
+          ))}
         </div>
 
-        {/* Conteo */}
-        <p className="mono-label text-[11px] text-leaf-dark/60 mb-6">
-          {filtered.length} {filtered.length === 1 ? 'producto' : 'productos'}
-          {catFilter || origenFilter ? ' — filtro activo' : ''}
-        </p>
+        {/* List */}
+        <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+          {lista.map((p) => <CatalogRow key={p.id} product={p} />)}
+        </div>
 
-        {/* Grid */}
-        {filtered.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
-        ) : (
-          <div className="py-16 text-center border border-dashed border-mist rounded-[4px]">
-            <p className="font-serif text-[17px] mb-2">Sin resultados para esos filtros</p>
-            <p className="text-[13px] text-ink/50">
-              Prueba a cambiar el país de origen o la categoría.
+        {/* CTA strip */}
+        <div
+          style={{
+            marginTop: 56, padding: '32px 28px', borderRadius: 20,
+            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
+            display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 220 }}>
+            <strong style={{ fontSize: 17, display: 'block', marginBottom: 4 }}>
+              ¿Ves algo que necesitas?
+            </strong>
+            <p style={{ color: '#6E6E73', fontSize: 14, margin: 0 }}>
+              Escríbenos y te confirmamos disponibilidad y precio al momento.
             </p>
           </div>
-        )}
-
-        {/* Nota al pie */}
-        <div className="mt-12 pt-6 border-t border-mist">
-          <p className="text-[12.5px] text-ink/45 max-w-prose">
-            Este catálogo es orientativo. La disponibilidad varía según temporada y mercado de origen.
-            Contacta con nosotros para confirmar stock, precios y plazos de entrega para tu zona.
-          </p>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <a href="mailto:info@fernandezycalzada.com" className="btn btn-primary">
+              Consulta disponibilidad de esta semana
+            </a>
+            <a href={WA_URL} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+              WhatsApp
+            </a>
+          </div>
         </div>
+
       </div>
     </>
   )

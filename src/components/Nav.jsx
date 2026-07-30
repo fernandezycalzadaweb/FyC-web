@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 
 const links = [
-  { to: '/nosotros', label: 'Quiénes somos' },
   { to: '/catalogo', label: 'Catálogo' },
-  { to: '/contacto', label: 'Contacto' },
+  { to: '/nosotros', label: 'Origen' },
 ]
 
 export default function Nav() {
@@ -12,7 +11,7 @@ export default function Nav() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    const onScroll = () => setScrolled(window.scrollY > 8)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
@@ -25,80 +24,135 @@ export default function Nav() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-shadow duration-200 ${
-        scrolled ? 'shadow-[0_1px_0_rgba(20,38,30,0.1)]' : ''
-      }`}
-      style={{ background: 'rgba(241,236,221,0.93)', backdropFilter: 'blur(8px)' }}
+      style={{
+        position: 'sticky',
+        top: 0,
+        zIndex: 50,
+        background: scrolled
+          ? 'rgba(251,251,253,0.85)'
+          : 'rgba(251,251,253,0.78)',
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+        borderBottom: '1px solid rgba(0,0,0,0.08)',
+        transition: 'background 0.2s',
+      }}
     >
-      <div className="max-w-[1180px] mx-auto px-6 flex items-center justify-between h-[62px]">
-        {/* Marca */}
-        <Link to="/" className="flex items-center no-underline" onClick={() => setOpen(false)}>
-          <img
-            src="/logo-fc.png"
-            alt="Fernández y Calzada S.L."
-            className="h-9 w-auto"
+      <div
+        style={{
+          maxWidth: 1120,
+          margin: '0 auto',
+          padding: '0 24px',
+          height: 52,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        {/* Brand */}
+        <Link
+          to="/"
+          onClick={() => setOpen(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14.5, textDecoration: 'none', color: '#1D1D1F' }}
+        >
+          <span
             style={{
-              maxWidth: '155px',
-              filter: 'drop-shadow(0 1px 2px rgba(20,38,30,0.10))',
+              width: 22, height: 22, borderRadius: 6,
+              background: '#1D1D1F', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11, fontWeight: 800, flexShrink: 0,
             }}
-          />
+          >
+            FC
+          </span>
+          <span className="hidden sm:block">Fernández y Calzada</span>
         </Link>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-7">
+        <nav className="hidden md:flex items-center gap-8">
           {links.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
-              className={({ isActive }) =>
-                `text-[13.5px] font-medium no-underline pb-0.5 border-b border-transparent transition-colors duration-100 ${
-                  isActive ? 'border-rust text-ink' : 'text-ink/75 hover:text-ink hover:border-rust/50'
-                }`
-              }
+              style={({ isActive }) => ({
+                fontSize: 12.5,
+                fontWeight: 500,
+                color: isActive ? '#1D1D1F' : '#6E6E73',
+                textDecoration: 'none',
+                transition: 'color 0.1s',
+              })}
             >
               {label}
             </NavLink>
           ))}
-          <Link
-            to="/contacto"
-            className="btn btn-primary text-[13px] py-2 px-4 ml-2"
-          >
+          <Link to="/contacto" className="btn btn-primary" style={{ fontSize: 12.5, padding: '7px 16px' }}>
             Contactar
           </Link>
         </nav>
 
-        {/* Hamburger */}
+        {/* Mobile hamburger */}
         <button
           className="md:hidden flex flex-col gap-[5px] p-2 -mr-2"
           onClick={() => setOpen((o) => !o)}
           aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
+          style={{ background: 'none', border: 'none' }}
         >
-          <span className={`block w-5 h-px bg-ink transition-transform duration-200 ${open ? 'translate-y-[6px] rotate-45' : ''}`} />
-          <span className={`block w-5 h-px bg-ink transition-opacity duration-200 ${open ? 'opacity-0' : ''}`} />
-          <span className={`block w-5 h-px bg-ink transition-transform duration-200 ${open ? '-translate-y-[6px] -rotate-45' : ''}`} />
+          <span
+            style={{
+              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
+              transition: 'transform 0.2s',
+              transform: open ? 'translateY(6.5px) rotate(45deg)' : 'none',
+            }}
+          />
+          <span
+            style={{
+              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
+              transition: 'opacity 0.2s',
+              opacity: open ? 0 : 1,
+            }}
+          />
+          <span
+            style={{
+              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
+              transition: 'transform 0.2s',
+              transform: open ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
+            }}
+          />
         </button>
       </div>
 
       {/* Mobile drawer */}
       {open && (
-        <div className="md:hidden fixed inset-0 top-[62px] bg-paper z-40 flex flex-col p-8 gap-6">
+        <div
+          className="md:hidden"
+          style={{
+            position: 'fixed', inset: 0, top: 52,
+            background: 'rgba(251,251,253,0.97)',
+            backdropFilter: 'blur(14px)',
+            display: 'flex', flexDirection: 'column',
+            padding: '32px 24px', gap: 4,
+          }}
+        >
           {links.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
               onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `font-serif text-2xl font-semibold no-underline ${isActive ? 'text-leaf' : 'text-ink'}`
-              }
+              style={({ isActive }) => ({
+                fontSize: 28, fontWeight: 700,
+                color: isActive ? '#1D1D1F' : '#6E6E73',
+                textDecoration: 'none',
+                padding: '8px 0',
+              })}
             >
               {label}
             </NavLink>
           ))}
-          <div className="mt-4 border-t border-mist pt-6">
+          <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
             <Link
               to="/contacto"
               onClick={() => setOpen(false)}
-              className="btn btn-primary w-full justify-center text-base py-3.5"
+              className="btn btn-primary"
+              style={{ width: '100%', fontSize: 16, padding: '14px 22px' }}
             >
               Contactar
             </Link>

@@ -1,36 +1,36 @@
 export default function LegalPage({ title, children }) {
   return (
     <>
-      {/* Cabecera oscura — mismo patrón que Catálogo / Nosotros */}
-      <div
-        className="text-paper py-12 md:py-16 relative overflow-hidden"
-        style={{ background: 'linear-gradient(165deg, #14261E 0%, #0E1C15 100%)' }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          aria-hidden
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(115deg, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 36px)',
-          }}
-        />
-        <div className="relative max-w-[1180px] mx-auto px-6">
-          <span className="eyebrow text-[11px] text-gold/70 mb-4">Legal</span>
+      {/* Header */}
+      <div style={{ padding: '64px 0 48px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
+          <p style={{ fontSize: 11.5, fontWeight: 700, color: '#6E6E73', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 12 }}>
+            Legal
+          </p>
           <h1
-            className="font-serif font-semibold text-paper leading-tight max-w-[28ch]"
-            style={{ fontSize: 'clamp(1.7rem, 3.5vw, 2.4rem)', letterSpacing: '-0.02em' }}
+            style={{
+              fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 800,
+              letterSpacing: '-0.025em', margin: 0, maxWidth: '28ch',
+            }}
           >
             {title}
           </h1>
         </div>
       </div>
 
-      {/* Cuerpo */}
-      <div className="max-w-[740px] mx-auto px-6 py-14 md:py-20">
-        {/* Aviso de borrador */}
-        <div className="flex gap-3.5 border border-gold/30 bg-gold/5 rounded-[4px] px-5 py-4 mb-12">
-          <span className="text-gold text-base flex-shrink-0 leading-relaxed" aria-hidden>⚠</span>
-          <p className="text-[13px] text-ink/60 leading-relaxed">
+      {/* Body */}
+      <div style={{ maxWidth: 740, margin: '0 auto', padding: '56px 24px 96px' }}>
+        {/* Draft warning */}
+        <div
+          style={{
+            display: 'flex', gap: 14,
+            border: '1px solid rgba(201,138,31,0.3)',
+            background: 'rgba(201,138,31,0.06)',
+            borderRadius: 16, padding: '16px 20px', marginBottom: 48,
+          }}
+        >
+          <span style={{ flexShrink: 0, color: '#C98A1F', lineHeight: 1.6 }} aria-hidden>⚠</span>
+          <p style={{ fontSize: 13, color: '#6E6E73', lineHeight: 1.65, margin: 0 }}>
             Borrador funcional basado en datos reales de la empresa. Antes de publicar, que alguien
             de Fernández y Calzada (o un asesor / gestoría) lo revise, especialmente los datos de
             inscripción en el Registro Mercantil que faltan por completar.

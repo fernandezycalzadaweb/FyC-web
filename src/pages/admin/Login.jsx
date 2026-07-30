@@ -3,109 +3,102 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, supabaseReady } from '../../lib/supabase'
 import { MOCK_ACCOUNTS, saveSession } from '../../lib/auth'
 
-export default function AdminLogin() {
-  const navigate = useNavigate()
-  const [form, setForm] = useState({ email: '', password: '' })
+export default function Login() {
+  const nav = useNavigate()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
 
     try {
       if (supabaseReady) {
-        const { error: authError } = await supabase.auth.signInWithPassword({
-          email: form.email,
-          password: form.password,
-        })
-        if (authError) throw new Error('Credenciales incorrectas.')
+        const { error: err } = await supabase.auth.signInWithPassword({ email, password })
+        if (err) { setError('Credenciales incorrectas.'); return }
+        nav('/admin/dashboard')
       } else {
-        // Modo mock: desarrollo sin Supabase
-        const account = MOCK_ACCOUNTS.find(
-          (a) => a.email === form.email && a.password === form.password
+        const acc = MOCK_ACCOUNTS.find(
+          (a) => a.email === email && a.password === password
         )
-        if (!account) throw new Error('Credenciales incorrectas.')
-        saveSession(account)
+        if (!acc) { setError('Credenciales incorrectas.'); return }
+        saveSession({ email: acc.email, name: acc.name, permissions: acc.permissions })
+        nav('/admin/dashboard')
       }
-      navigate('/admin')
-    } catch (err) {
-      setError(err.message)
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-ink-deep flex items-center justify-center px-6 py-16">
-      <div className="w-full max-w-sm">
-        {/* Logo */}
-        <div className="text-center mb-10">
-          <div className="w-12 h-12 rounded-[7px] bg-leaf flex items-center justify-center text-paper font-serif font-bold text-lg mx-auto mb-4 select-none">
+    <div
+      style={{
+        minHeight: '100vh', display: 'flex', alignItems: 'center',
+        justifyContent: 'center', padding: '24px',
+        background: '#FBFBFD',
+      }}
+    >
+      <div style={{ width: '100%', maxWidth: 380 }}>
+        {/* Brand mark */}
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div
+            style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: '#1D1D1F', color: '#fff',
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 14, fontWeight: 800, marginBottom: 14,
+            }}
+          >
             FC
           </div>
-          <p className="font-serif text-[15px] font-medium text-paper/80">Fernández y Calzada</p>
-          <p className="mono-label text-[9.5px] text-paper/30 mt-1">Panel privado</p>
+          <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
+            Acceso privado
+          </h1>
+          <p style={{ fontSize: 13.5, color: '#6E6E73', marginTop: 5 }}>
+            Fernández y Calzada
+          </p>
         </div>
 
-        <div className="bg-card rounded-[5px] p-8 border border-mist/20">
-          <h1 className="font-serif text-[20px] font-semibold mb-6 text-ink">Acceso</h1>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <label className="field-label">Email</label>
+            <input
+              className="field-input"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+            />
+          </div>
+          <div>
+            <label className="field-label">Contraseña</label>
+            <input
+              className="field-input"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="email" className="mono-label text-[10px] text-leaf-dark/70">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="email"
-                value={form.email}
-                onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                required
-                className="px-3.5 py-2.5 rounded-[3px] border border-mist bg-white text-[14px] text-ink placeholder:text-ink/30 focus:outline-none focus:border-leaf focus:ring-1 focus:ring-leaf/30 transition-colors"
-                placeholder="usuario@fernandezycalzada.com"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="password" className="mono-label text-[10px] text-leaf-dark/70">
-                Contraseña
-              </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={form.password}
-                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-                required
-                className="px-3.5 py-2.5 rounded-[3px] border border-mist bg-white text-[14px] text-ink placeholder:text-ink/30 focus:outline-none focus:border-leaf focus:ring-1 focus:ring-leaf/30 transition-colors"
-                placeholder="••••••••"
-              />
-            </div>
-
-            {error && (
-              <p className="text-[12.5px] text-rust border border-rust/20 bg-rust/5 rounded-[3px] px-3 py-2">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary w-full justify-center mt-2 disabled:opacity-60"
-            >
-              {loading ? 'Accediendo…' : 'Entrar'}
-            </button>
-          </form>
-
-          {!supabaseReady && (
-            <p className="mono-label text-[9px] text-ink/35 text-center mt-5">
-              Modo desarrollo · Supabase no conectado
-            </p>
+          {error && (
+            <p style={{ fontSize: 13.5, color: '#E0566E', margin: 0 }}>{error}</p>
           )}
-        </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+            style={{ marginTop: 4 }}
+          >
+            {loading ? 'Entrando…' : 'Entrar'}
+          </button>
+        </form>
       </div>
     </div>
   )
