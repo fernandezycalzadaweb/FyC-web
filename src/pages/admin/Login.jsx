@@ -17,15 +17,36 @@ export default function Login() {
 
     try {
       if (supabaseReady) {
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password })
-        if (err) { setError('Credenciales incorrectas.'); return }
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password })
+        if (authErr || !data.user) {
+          setError('Credenciales incorrectas.')
+          return
+        }
+
+        // Read role from profiles table
+        const { data: profile, error: profileErr } = await supabase
+          .from('profiles')
+          .select('role, nombre')
+          .eq('id', data.user.id)
+          .single()
+
+        if (profileErr) {
+          setError('No se pudo leer el perfil de usuario.')
+          await supabase.auth.signOut()
+          return
+        }
+
+        // Session stored in Supabase Auth — no need to persist manually
+        // but we cache name+role so Dashboard can read it synchronously
+        saveSession({ email: data.user.email, name: profile.nombre ?? data.user.email, role: profile.role })
         nav('/admin/dashboard')
       } else {
-        const acc = MOCK_ACCOUNTS.find(
-          (a) => a.email === email && a.password === password
-        )
-        if (!acc) { setError('Credenciales incorrectas.'); return }
-        saveSession({ email: acc.email, name: acc.name, permissions: acc.permissions })
+        const acc = MOCK_ACCOUNTS.find((a) => a.email === email && a.password === password)
+        if (!acc) {
+          setError('Credenciales incorrectas.')
+          return
+        }
+        saveSession({ email: acc.email, name: acc.name, role: acc.role })
         nav('/admin/dashboard')
       }
     } finally {
@@ -44,22 +65,14 @@ export default function Login() {
       <div style={{ width: '100%', maxWidth: 380 }}>
         {/* Brand mark */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
-          <div
-            style={{
-              width: 36, height: 36, borderRadius: 10,
-              background: '#1D1D1F', color: '#fff',
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, marginBottom: 14,
-            }}
-          >
-            FC
-          </div>
+          <img
+            src="/logo-fc.png"
+            alt="Fernández y Calzada"
+            style={{ height: 32, width: 'auto', display: 'block', margin: '0 auto 16px' }}
+          />
           <h1 style={{ fontSize: 22, fontWeight: 800, margin: 0, letterSpacing: '-0.02em' }}>
             Acceso privado
           </h1>
-          <p style={{ fontSize: 13.5, color: '#6E6E73', marginTop: 5 }}>
-            Fernández y Calzada
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -72,6 +85,7 @@ export default function Login() {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
               required
+              disabled={loading}
             />
           </div>
           <div>
@@ -83,6 +97,7 @@ export default function Login() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
+              disabled={loading}
             />
           </div>
 
@@ -94,7 +109,7 @@ export default function Login() {
             type="submit"
             className="btn btn-primary"
             disabled={loading}
-            style={{ marginTop: 4 }}
+            style={{ marginTop: 4, opacity: loading ? 0.6 : 1 }}
           >
             {loading ? 'Entrando…' : 'Entrar'}
           </button>

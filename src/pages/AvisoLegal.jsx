@@ -7,7 +7,7 @@ const datos = [
   ['Domicilio', 'Calle Río Tera 2, 37003, Salamanca'],
   ['Email de contacto', 'info@fernandezycalzada.com'],
   ['Teléfono', '923 18 22 22'],
-  ['Registro Mercantil', 'Pendiente — tomo, folio y hoja por completar'],
+  ['Registro Mercantil', 'Registro Mercantil de Salamanca'],
 ]
 
 function Section({ title, children }) {

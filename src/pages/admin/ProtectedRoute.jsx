@@ -25,8 +25,8 @@ export default function ProtectedRoute({ children }) {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-ink-deep flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full border-2 border-gold/40 border-t-gold animate-spin" />
+      <div style={{ minHeight: '100vh', background: '#FBFBFD', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 24, height: 24, borderRadius: '50%', border: '2px solid rgba(0,0,0,0.08)', borderTopColor: '#1D1D1F', animation: 'spin 0.7s linear infinite' }} />
       </div>
     )
   }

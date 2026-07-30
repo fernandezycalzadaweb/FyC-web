@@ -54,17 +54,11 @@ export default function Nav() {
           onClick={() => setOpen(false)}
           style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14.5, textDecoration: 'none', color: '#1D1D1F' }}
         >
-          <span
-            style={{
-              width: 22, height: 22, borderRadius: 6,
-              background: '#1D1D1F', color: '#fff',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 800, flexShrink: 0,
-            }}
-          >
-            FC
-          </span>
-          <span className="hidden sm:block">Fernández y Calzada</span>
+          <img
+            src="/logo-fc.png"
+            alt="Fernández y Calzada"
+            style={{ height: 28, width: 'auto', display: 'block' }}
+          />
         </Link>
 
         {/* Desktop nav */}

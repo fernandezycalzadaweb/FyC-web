@@ -1,36 +1,23 @@
-// Permissions system — add new permissions here, add new accounts to MOCK_ACCOUNTS.
-// When Supabase is connected, these mock accounts are bypassed and permissions
-// come from the `profiles` table's permissions column (jsonb array).
-
-export const PERMISSIONS = {
-  CATALOGO_EDIT:  'catalogo.edit',
-  MENSAJES_VIEW:  'mensajes.view',
-  METRICAS_VIEW:  'metricas.view',
-  CUENTAS_MANAGE: 'cuentas.manage',
+export const ROLES = {
+  ADMINISTRADOR: 'administrador',
+  EMPRESA: 'empresa',
 }
 
+// Mock accounts — only used when Supabase is not configured
 export const MOCK_ACCOUNTS = [
-  {
-    email: 'admin@fernandezycalzada.com',
-    password: 'admin',
-    name: 'Alberto',
-    permissions: [
-      PERMISSIONS.CATALOGO_EDIT,
-      PERMISSIONS.MENSAJES_VIEW,
-      PERMISSIONS.METRICAS_VIEW,
-      PERMISSIONS.CUENTAS_MANAGE,
-    ],
-  },
-  {
-    email: 'fyc@fernandezycalzada.com',
-    password: 'fyc',
-    name: 'Fernández y Calzada',
-    permissions: [
-      PERMISSIONS.CATALOGO_EDIT,
-      PERMISSIONS.METRICAS_VIEW,
-    ],
-  },
+  { email: 'admin@fernandezycalzada.com', password: 'admin', name: 'Alberto',             role: ROLES.ADMINISTRADOR },
+  { email: 'fyc@fernandezycalzada.com',   password: 'fyc',   name: 'Fernández y Calzada', role: ROLES.EMPRESA },
 ]
+
+// features: 'catalogo' | 'mensajes' | 'metricas' | 'cuentas'
+// administrador: everything
+// empresa: catalogo + metricas only
+export function canAccess(session, feature) {
+  if (!session?.role) return false
+  if (session.role === ROLES.ADMINISTRADOR) return true
+  if (session.role === ROLES.EMPRESA) return feature === 'catalogo' || feature === 'metricas'
+  return false
+}
 
 export function getSession() {
   try {
@@ -41,14 +28,10 @@ export function getSession() {
   }
 }
 
-export function saveSession({ email, name, permissions }) {
-  sessionStorage.setItem('fc_session', JSON.stringify({ email, name, permissions }))
+export function saveSession({ email, name, role }) {
+  sessionStorage.setItem('fc_session', JSON.stringify({ email, name, role }))
 }
 
 export function clearSession() {
   sessionStorage.removeItem('fc_session')
-}
-
-export function hasPerm(session, perm) {
-  return session?.permissions?.includes(perm) ?? false
 }

@@ -20,23 +20,6 @@ export default function LegalPage({ title, children }) {
 
       {/* Body */}
       <div style={{ maxWidth: 740, margin: '0 auto', padding: '56px 24px 96px' }}>
-        {/* Draft warning */}
-        <div
-          style={{
-            display: 'flex', gap: 14,
-            border: '1px solid rgba(201,138,31,0.3)',
-            background: 'rgba(201,138,31,0.06)',
-            borderRadius: 16, padding: '16px 20px', marginBottom: 48,
-          }}
-        >
-          <span style={{ flexShrink: 0, color: '#C98A1F', lineHeight: 1.6 }} aria-hidden>⚠</span>
-          <p style={{ fontSize: 13, color: '#6E6E73', lineHeight: 1.65, margin: 0 }}>
-            Borrador funcional basado en datos reales de la empresa. Antes de publicar, que alguien
-            de Fernández y Calzada (o un asesor / gestoría) lo revise, especialmente los datos de
-            inscripción en el Registro Mercantil que faltan por completar.
-          </p>
-        </div>
-
         {children}
       </div>
     </>

@@ -110,6 +110,10 @@
   .field-input::placeholder { color: #6E6E73; }
 }
 
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* SVG map keyframes — outside @layer so inline animation="" can find them */
 @keyframes route-flow {
   from { stroke-dashoffset: 30; }
