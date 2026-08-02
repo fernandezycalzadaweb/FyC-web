@@ -8,7 +8,6 @@ export function useTrackVisit(pagina) {
       pagina,
       referrer: document.referrer || null,
       user_agent: navigator.userAgent,
-    })
-    // Fire-and-forget: errors silently ignored to never interrumpir la UX
+    }).then(() => {}) // .then() necesario para que Supabase ejecute la petición HTTP
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 }

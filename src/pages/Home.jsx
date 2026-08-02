@@ -187,13 +187,13 @@ export default function Home() {
 
       {/* ── STATS ─────────────────────────────────────────────────── */}
       <section style={{ padding: '72px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 32, textAlign: 'center' }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 32 }}>
           {[
             { display: '3',           size: 'clamp(40px,5.5vw,60px)', label: 'países de origen' },
             { display: 'Sin mínimo',  size: 'clamp(20px,2.8vw,30px)', label: 'pedidos a tu medida' },
             { display: 'Trato directo', size: 'clamp(18px,2.5vw,26px)', label: 'contacto personal' },
           ].map(({ display, size, label }) => (
-            <div key={label}>
+            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               <div style={{ fontSize: size, fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1.1 }}>
                 {display}
               </div>
