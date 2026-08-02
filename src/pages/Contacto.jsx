@@ -1,11 +1,14 @@
 import { useState } from 'react'
 import Seo from '../components/Seo'
 import { supabase, supabaseReady } from '../lib/supabase'
+import { useTrackVisit } from '../hooks/useTrackVisit'
 
 const INITIAL = { floristeria: '', mensaje: '', email: '', telefono: '' }
 const WA_URL = 'https://wa.me/34608615272'
 
 export default function Contacto() {
+  useTrackVisit('/contacto')
+
   const [form, setForm] = useState(INITIAL)
   const [status, setStatus] = useState('idle') // idle | loading | ok | error
 

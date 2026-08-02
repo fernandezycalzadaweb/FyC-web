@@ -1,4 +1,5 @@
 import Seo from '../components/Seo'
+import { useTrackVisit } from '../hooks/useTrackVisit'
 
 const PRENSA = [
   {
@@ -120,6 +121,8 @@ function PressCard({ item }) {
 }
 
 export default function Nosotros() {
+  useTrackVisit('/nosotros')
+
   return (
     <>
       <Seo path="/nosotros" />

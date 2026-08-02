@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Seo from '../components/Seo'
 import productosStatic, { CATEGORIAS, CAT_STYLES, ORIGEN_LABEL } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
+import { useTrackVisit } from '../hooks/useTrackVisit'
 
 const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
@@ -124,6 +125,8 @@ function StickyBar() {
 }
 
 export default function Catalogo() {
+  useTrackVisit('/catalogo')
+
   const [productos, setProductos] = useState(productosStatic.filter((p) => p.disponible))
   const [filtro, setFiltro] = useState(TODOS)
 

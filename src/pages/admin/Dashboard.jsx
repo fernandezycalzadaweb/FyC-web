@@ -50,8 +50,8 @@ export default function Dashboard() {
   const [mensajesLoading, setMensajesLoading] = useState(true)
 
   // Analítica
-  const [visitas, setVisitas] = useState([])        // [{ pagina, visitas }]
-  const [visitasError, setVisitasError] = useState(null) // null | 'no_table' | 'error'
+  const [visitas, setVisitas] = useState([])        // raw: [{ pagina, referrer }]
+  const [visitasError, setVisitasError] = useState(null)
 
   // Tab — default 'mensajes', se ajusta tras cargar sesión si no hay acceso
   const [tab, setTab] = useState('mensajes')
@@ -106,26 +106,11 @@ export default function Dashboard() {
     const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
     supabase
       .from('analytics_visitas')
-      .select('pagina')
+      .select('pagina, referrer')
       .gte('created_at', since)
       .then(({ data, error }) => {
-        if (error) {
-          setVisitasError('no_table')
-          return
-        }
-        if (!data || data.length === 0) {
-          setVisitas([])
-          return
-        }
-        const counts = {}
-        for (const row of data) {
-          counts[row.pagina] = (counts[row.pagina] || 0) + 1
-        }
-        setVisitas(
-          Object.entries(counts)
-            .map(([pagina, visitas]) => ({ pagina, visitas }))
-            .sort((a, b) => b.visitas - a.visitas)
-        )
+        if (error) { setVisitasError('no_table'); return }
+        setVisitas(data ?? [])
       })
   }, [])
 
@@ -169,11 +154,29 @@ export default function Dashboard() {
     }
   }
 
+  // ── Referrer classifier ───────────────────────────────────────────────────
+  function classifyReferrer(ref) {
+    if (!ref) return 'Directo'
+    const r = ref.toLowerCase()
+    if (/google|bing|yahoo|duckduckgo|ecosia|baidu/.test(r)) return 'Buscador'
+    if (/facebook|instagram|whatsapp|tiktok|twitter|t\.co|x\.com/.test(r)) return 'Redes sociales'
+    return 'Otros'
+  }
+
   // ── Stats ─────────────────────────────────────────────────────────────────
   const pendientes = mensajes.filter((m) => (m.estado ?? 'pendiente') === 'pendiente').length
   const respondidosMes = mensajes.filter((m) => m.estado === 'respondido' && new Date(m.created_at) >= thisMonthStart()).length
-  const totalVisitas = visitas.reduce((a, v) => a + v.visitas, 0)
+  const totalVisitas = visitas.length
   const disponibles = productos.filter((p) => p.disponible).length
+
+  // Agrupaciones para métricas
+  const visitasPorPagina = Object.entries(
+    visitas.reduce((acc, r) => { acc[r.pagina] = (acc[r.pagina] || 0) + 1; return acc }, {})
+  ).map(([pagina, n]) => ({ pagina, n })).sort((a, b) => b.n - a.n)
+
+  const visitasPorOrigen = Object.entries(
+    visitas.reduce((acc, r) => { const c = classifyReferrer(r.referrer); acc[c] = (acc[c] || 0) + 1; return acc }, {})
+  ).map(([cat, n]) => ({ cat, n })).sort((a, b) => b.n - a.n)
 
   // ── Tabs (orden: Mensajes, Métricas, Catálogo) ────────────────────────────
   const TABS = [
@@ -334,42 +337,72 @@ export default function Dashboard() {
         {tab === 'metricas' && canAccess(session, 'metricas') && (
           visitasError ? (
             <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', maxWidth: 560 }}>
-              <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 10px' }}>Tracking de visitas no implementado</p>
-              <p style={{ color: '#6E6E73', fontSize: 14, margin: '0 0 16px', lineHeight: 1.6 }}>
-                La tabla <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 6px', borderRadius: 4, fontSize: 12.5 }}>analytics_visitas</code> no existe o no tiene datos.
-                Para ver visitas reales necesitas dos pasos:
+              <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 10px' }}>Error al conectar con analytics_visitas</p>
+              <p style={{ color: '#6E6E73', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
+                Comprueba que la tabla existe y que la política RLS permite lectura a roles autenticados.
               </p>
-              <ol style={{ color: '#6E6E73', fontSize: 14, margin: 0, paddingLeft: 20, lineHeight: 2 }}>
-                <li>Crear la tabla en Supabase (SQL en <code style={{ fontSize: 12 }}>supabase-dashboard.sql</code>)</li>
-                <li>Añadir un <code style={{ fontSize: 12 }}>INSERT</code> en cada página al montarse el componente</li>
-              </ol>
             </div>
           ) : visitas.length === 0 ? (
             <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', color: '#6E6E73', fontSize: 14 }}>
-              La tabla existe pero no hay visitas registradas en los últimos 30 días.
+              Sin visitas registradas en los últimos 30 días. El tracking está activo — los datos aparecerán en cuanto lleguen visitas.
             </div>
           ) : (
-            <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
-              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                    <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Página</th>
-                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Visitas (30 d)</th>
-                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>%</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visitas.map(({ pagina, visitas: n }, i) => (
-                    <tr key={pagina} style={i < visitas.length - 1 ? ROW : undefined}>
-                      <td style={{ padding: '13px 16px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
-                      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
-                      <td style={{ padding: '13px 16px', textAlign: 'right', color: '#6E6E73' }}>
-                        {totalVisitas ? ((n / totalVisitas) * 100).toFixed(1) : '0'}%
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+
+              {/* Páginas más visitadas */}
+              <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+                <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
+                    Páginas más visitadas · 30 días
+                  </span>
+                </div>
+                <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {visitasPorPagina.map(({ pagina, n }, i) => (
+                      <tr key={pagina} style={i < visitasPorPagina.length - 1 ? ROW : undefined}>
+                        <td style={{ padding: '12px 18px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
+                        <td style={{ padding: '12px 18px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
+                        <td style={{ padding: '12px 18px', textAlign: 'right', color: '#6E6E73', minWidth: 52 }}>
+                          {((n / totalVisitas) * 100).toFixed(0)}%
+                        </td>
+                        <td style={{ padding: '12px 18px 12px 0', width: 80 }}>
+                          <div style={{ height: 5, borderRadius: 100, background: 'rgba(0,0,0,0.06)' }}>
+                            <div style={{ height: '100%', borderRadius: 100, background: '#8CBF3F', width: `${(n / totalVisitas) * 100}%` }} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Origen del tráfico */}
+              <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+                <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.02)' }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
+                    Origen del tráfico · 30 días
+                  </span>
+                </div>
+                <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                  <tbody>
+                    {visitasPorOrigen.map(({ cat, n }, i) => (
+                      <tr key={cat} style={i < visitasPorOrigen.length - 1 ? ROW : undefined}>
+                        <td style={{ padding: '12px 18px', fontWeight: 600 }}>{cat}</td>
+                        <td style={{ padding: '12px 18px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
+                        <td style={{ padding: '12px 18px', textAlign: 'right', color: '#6E6E73', minWidth: 52 }}>
+                          {((n / totalVisitas) * 100).toFixed(0)}%
+                        </td>
+                        <td style={{ padding: '12px 18px 12px 0', width: 80 }}>
+                          <div style={{ height: 5, borderRadius: 100, background: 'rgba(0,0,0,0.06)' }}>
+                            <div style={{ height: '100%', borderRadius: 100, background: '#4A7A34', width: `${(n / totalVisitas) * 100}%` }} />
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
             </div>
           )
         )}

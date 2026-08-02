@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Seo from '../components/Seo'
 import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
+import { useTrackVisit } from '../hooks/useTrackVisit'
 
 // ── Carrusel ──────────────────────────────────────────────────────────────────
 // Para añadir imágenes en el futuro, basta con añadir entradas a este array.
@@ -131,6 +132,8 @@ function MapSVG() {
 
 // ── Página ────────────────────────────────────────────────────────────────────
 export default function Home() {
+  useTrackVisit('/')
+
   const [productos, setProductos] = useState(productosStatic)
 
   useEffect(() => {
