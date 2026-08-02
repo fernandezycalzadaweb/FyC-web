@@ -4,37 +4,17 @@ import { supabase, supabaseReady } from '../../lib/supabase'
 import { getSession, clearSession, canAccess, saveSession } from '../../lib/auth'
 import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../../data/products'
 
-const MOCK_MENSAJES = [
-  {
-    id: 1,
-    floristeria: 'Flores del Centro',
-    email: 'maria@floresdel.com',
-    mensaje: 'Buenos días, me gustaría saber disponibilidad de peonías para mayo.',
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-    leido: false,
-  },
-  {
-    id: 2,
-    floristeria: 'El Ramo',
-    email: 'juan@elramo.es',
-    mensaje: 'Consulta de precios para pedido semanal de rosas y alstroemerias.',
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    leido: true,
-  },
-]
-
-const MOCK_ANALYTICS = [
-  { pagina: '/', visitas: 142 },
-  { pagina: '/catalogo', visitas: 98 },
-  { pagina: '/contacto', visitas: 44 },
-  { pagina: '/nosotros', visitas: 21 },
-]
-
 const ROW = { borderBottom: '1px solid rgba(0,0,0,0.08)' }
 
-function StatCard({ label, value, sub }) {
+function StatCard({ label, value, sub, accent }) {
   return (
-    <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '20px 22px' }}>
+    <div
+      style={{
+        background: accent ? 'rgba(140,191,63,0.05)' : '#fff',
+        border: accent ? '1px solid rgba(140,191,63,0.28)' : '1px solid rgba(0,0,0,0.08)',
+        borderRadius: 16, padding: '20px 22px',
+      }}
+    >
       <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73', margin: '0 0 8px' }}>
         {label}
       </p>
@@ -46,48 +26,52 @@ function StatCard({ label, value, sub }) {
   )
 }
 
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function fmtDate(iso) {
+  return new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+}
+
+function thisMonthStart() {
+  const d = new Date()
+  d.setDate(1)
+  d.setHours(0, 0, 0, 0)
+  return d
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
-  const [productos, setProductos] = useState(productosStatic.map((p) => ({ ...p })))
-  const [tab, setTab] = useState('catalogo')
   const [session, setSession] = useState(null)
 
-  // Load productos from Supabase (all, including no disponibles, for admin view)
-  useEffect(() => {
-    if (!supabaseReady) return
-    supabase
-      .from('productos')
-      .select('*')
-      .order('categoria')
-      .then(({ data, error }) => {
-        if (!error && data?.length) setProductos(data)
-      })
-  }, [])
+  // Catálogo
+  const [productos, setProductos] = useState(productosStatic.map((p) => ({ ...p })))
 
+  // Mensajes
+  const [mensajes, setMensajes] = useState([])
+  const [mensajesLoading, setMensajesLoading] = useState(true)
+
+  // Analítica
+  const [visitas, setVisitas] = useState([])        // [{ pagina, visitas }]
+  const [visitasError, setVisitasError] = useState(null) // null | 'no_table' | 'error'
+
+  // Tab — default 'mensajes', se ajusta tras cargar sesión si no hay acceso
+  const [tab, setTab] = useState('mensajes')
+
+  // ── Sesión ────────────────────────────────────────────────────────────────
   useEffect(() => {
     if (supabaseReady) {
       supabase.auth.getUser().then(async ({ data }) => {
         if (!data.user) return
-
-        // Try to get role from sessionStorage cache first (set during login)
         const cached = getSession()
         if (cached?.email === data.user.email && cached?.role) {
           setSession(cached)
           return
         }
-
-        // Fallback: query profiles table directly
         const { data: profile } = await supabase
           .from('profiles')
           .select('role, nombre')
           .eq('id', data.user.id)
           .single()
-
-        const s = {
-          email: data.user.email,
-          name: profile?.nombre ?? data.user.email,
-          role: profile?.role ?? 'empresa',
-        }
+        const s = { email: data.user.email, name: profile?.nombre ?? data.user.email, role: profile?.role ?? 'empresa' }
         saveSession(s)
         setSession(s)
       })
@@ -96,42 +80,107 @@ export default function Dashboard() {
     }
   }, [])
 
+  // ── Catálogo ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!supabaseReady) return
+    supabase.from('productos').select('*').order('categoria')
+      .then(({ data, error }) => { if (!error && data?.length) setProductos(data) })
+  }, [])
+
+  // ── Mensajes ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!supabaseReady) { setMensajesLoading(false); return }
+    supabase
+      .from('mensajes_contacto')
+      .select('id, floristeria, mensaje, email, telefono, created_at, estado')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) setMensajes(data)
+        setMensajesLoading(false)
+      })
+  }, [])
+
+  // ── Visitas ───────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!supabaseReady) { setVisitasError('no_table'); return }
+    const since = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
+    supabase
+      .from('analytics_visitas')
+      .select('pagina')
+      .gte('created_at', since)
+      .then(({ data, error }) => {
+        if (error) {
+          setVisitasError('no_table')
+          return
+        }
+        if (!data || data.length === 0) {
+          setVisitas([])
+          return
+        }
+        const counts = {}
+        for (const row of data) {
+          counts[row.pagina] = (counts[row.pagina] || 0) + 1
+        }
+        setVisitas(
+          Object.entries(counts)
+            .map(([pagina, visitas]) => ({ pagina, visitas }))
+            .sort((a, b) => b.visitas - a.visitas)
+        )
+      })
+  }, [])
+
+  // ── Toggle tab al cargar sesión si el tab activo no es accesible ──────────
+  useEffect(() => {
+    if (!session) return
+    if (!canAccess(session, tab === 'catalogo' ? 'catalogo' : tab)) {
+      const first = ['mensajes', 'metricas', 'catalogo'].find((f) => canAccess(session, f))
+      if (first) setTab(first)
+    }
+  }, [session])
+
+  // ── Logout ────────────────────────────────────────────────────────────────
   const handleLogout = async () => {
     clearSession()
     if (supabaseReady) await supabase.auth.signOut()
     navigate('/admin/login')
   }
 
+  // ── Toggle disponible (catálogo) ──────────────────────────────────────────
   const toggleDisponible = async (id) => {
     const producto = productos.find((p) => p.id === id)
     if (!producto) return
-    const nuevoValor = !producto.disponible
-
-    // Optimistic update
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: nuevoValor } : p)))
-
+    const nuevo = !producto.disponible
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: nuevo } : p)))
     if (supabaseReady) {
-      const { error } = await supabase
-        .from('productos')
-        .update({ disponible: nuevoValor })
-        .eq('id', id)
-
-      if (error) {
-        // Revert on failure
-        setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !nuevoValor } : p)))
-      }
+      const { error } = await supabase.from('productos').update({ disponible: nuevo }).eq('id', id)
+      if (error) setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !nuevo } : p)))
     }
   }
 
-  const disponibles = productos.filter((p) => p.disponible).length
-  const noLeidos = MOCK_MENSAJES.filter((m) => !m.leido).length
-  const totalVisitas = MOCK_ANALYTICS.reduce((a, p) => a + p.visitas, 0)
+  // ── Toggle estado (mensajes) ──────────────────────────────────────────────
+  const toggleEstado = async (id) => {
+    const msg = mensajes.find((m) => m.id === id)
+    if (!msg) return
+    const nuevo = msg.estado === 'respondido' ? 'pendiente' : 'respondido'
+    setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, estado: nuevo } : m)))
+    if (supabaseReady) {
+      const { error } = await supabase.from('mensajes_contacto').update({ estado: nuevo }).eq('id', id)
+      if (error) setMensajes((prev) => prev.map((m) => (m.id === id ? { ...m, estado: msg.estado } : m)))
+    }
+  }
 
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  const pendientes = mensajes.filter((m) => (m.estado ?? 'pendiente') === 'pendiente').length
+  const respondidosMes = mensajes.filter((m) => m.estado === 'respondido' && new Date(m.created_at) >= thisMonthStart()).length
+  const totalVisitas = visitas.reduce((a, v) => a + v.visitas, 0)
+  const disponibles = productos.filter((p) => p.disponible).length
+
+  // ── Tabs (orden: Mensajes, Métricas, Catálogo) ────────────────────────────
   const TABS = [
-    { id: 'catalogo', label: 'Catálogo',                                           show: canAccess(session, 'catalogo') },
-    { id: 'mensajes', label: `Mensajes${noLeidos ? ` (${noLeidos})` : ''}`,        show: canAccess(session, 'mensajes') },
-    { id: 'metricas', label: 'Métricas',                                            show: canAccess(session, 'metricas') },
-  ].filter((t) => t.show)
+    { id: 'mensajes', label: `Mensajes${pendientes ? ` (${pendientes})` : ''}`, feature: 'mensajes' },
+    { id: 'metricas', label: 'Métricas',                                          feature: 'metricas' },
+    { id: 'catalogo', label: 'Catálogo',                                           feature: 'catalogo' },
+  ].filter((t) => canAccess(session, t.feature))
 
   return (
     <div style={{ minHeight: '100vh', background: '#FBFBFD' }}>
@@ -140,7 +189,7 @@ export default function Dashboard() {
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', height: 52, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <img src="/logo-fc.png" alt="Fernández y Calzada" style={{ height: 24, width: 'auto', display: 'block' }} />
-            <span style={{ fontWeight: 700, fontSize: 13.5, color: '#1D1D1F' }}>Panel privado</span>
+            <span style={{ fontWeight: 700, fontSize: 13.5 }}>Panel privado</span>
             {session?.name && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: 'rgba(0,0,0,0.05)', color: '#6E6E73' }}>
                 {session.name}
@@ -148,20 +197,15 @@ export default function Dashboard() {
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-            <Link
-              to="/"
-              style={{ fontSize: 12.5, color: '#6E6E73', textDecoration: 'none' }}
+            <Link to="/" style={{ fontSize: 12.5, color: '#6E6E73', textDecoration: 'none' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#1D1D1F')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}
-            >
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}>
               Ver web →
             </Link>
-            <button
-              onClick={handleLogout}
+            <button onClick={handleLogout}
               style={{ background: 'none', border: 'none', fontSize: 12.5, color: '#6E6E73', cursor: 'pointer', padding: 0 }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#1D1D1F')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}
-            >
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}>
               Salir
             </button>
           </div>
@@ -169,40 +213,168 @@ export default function Dashboard() {
       </div>
 
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '36px 24px 80px' }}>
-        {/* Stats */}
+
+        {/* ── Stats ─────────────────────────────────────────────────────── */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 36 }}>
-          <StatCard label="Productos totales" value={productos.length} sub="en catálogo" />
-          <StatCard label="Disponibles" value={disponibles} sub={`de ${productos.length}`} />
           {canAccess(session, 'mensajes') && (
-            <StatCard label="Mensajes nuevos" value={noLeidos} sub="sin leer" />
+            <StatCard
+              label="Mensajes pendientes"
+              value={mensajesLoading ? '…' : pendientes}
+              sub="sin responder"
+              accent={pendientes > 0}
+            />
           )}
           {canAccess(session, 'metricas') && (
-            <StatCard label="Visitas" value={totalVisitas} sub="últimos 30 días" />
+            <StatCard
+              label="Visitas"
+              value={visitasError ? '—' : totalVisitas}
+              sub="últimos 30 días"
+            />
           )}
+          {canAccess(session, 'mensajes') && (
+            <StatCard
+              label="Respondidos este mes"
+              value={mensajesLoading ? '…' : respondidosMes}
+              sub="mensajes cerrados"
+            />
+          )}
+          <StatCard
+            label="Productos"
+            value={`${disponibles} / ${productos.length}`}
+            sub="disponibles"
+          />
         </div>
 
-        {/* Tabs */}
+        {/* ── Tabs ──────────────────────────────────────────────────────── */}
         {TABS.length > 0 && (
           <div style={{ display: 'flex', borderBottom: '1px solid rgba(0,0,0,0.08)', marginBottom: 28 }}>
             {TABS.map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => setTab(id)}
+              <button key={id} onClick={() => setTab(id)}
                 style={{
                   padding: '10px 20px', fontSize: 13, fontWeight: 600,
                   background: 'none', border: 'none', cursor: 'pointer',
                   borderBottom: `2px solid ${tab === id ? '#1D1D1F' : 'transparent'}`,
                   marginBottom: -1,
                   color: tab === id ? '#1D1D1F' : '#6E6E73',
-                }}
-              >
+                }}>
                 {label}
               </button>
             ))}
           </div>
         )}
 
-        {/* ── TAB: Catálogo ─────────────────────────────────────── */}
+        {/* ── TAB: Mensajes ─────────────────────────────────────────────── */}
+        {tab === 'mensajes' && canAccess(session, 'mensajes') && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {mensajesLoading && (
+              <p style={{ color: '#6E6E73', fontSize: 14 }}>Cargando mensajes…</p>
+            )}
+            {!mensajesLoading && mensajes.length === 0 && (
+              <div style={{ padding: '40px 24px', textAlign: 'center', color: '#6E6E73', fontSize: 14, background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
+                No hay mensajes todavía.
+              </div>
+            )}
+            {mensajes.map((m) => {
+              const estado = m.estado ?? 'pendiente'
+              const esPendiente = estado === 'pendiente'
+              return (
+                <div key={m.id}
+                  style={{
+                    borderRadius: 16, padding: '20px 22px', background: '#fff',
+                    border: esPendiente ? '1px solid rgba(140,191,63,0.3)' : '1px solid rgba(0,0,0,0.08)',
+                  }}
+                >
+                  {/* Cabecera */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 14, flexWrap: 'wrap' }}>
+                    <div>
+                      <p style={{ fontWeight: 700, fontSize: 14.5, margin: '0 0 2px' }}>
+                        {m.floristeria || <span style={{ color: '#6E6E73', fontWeight: 400 }}>Sin nombre</span>}
+                      </p>
+                      <span style={{ fontSize: 11, color: '#6E6E73' }}>{fmtDate(m.created_at)}</span>
+                    </div>
+                    <button
+                      onClick={() => toggleEstado(m.id)}
+                      style={{
+                        fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 100,
+                        border: 'none', cursor: 'pointer', flexShrink: 0,
+                        background: esPendiente ? 'rgba(140,191,63,0.15)' : 'rgba(0,0,0,0.06)',
+                        color: esPendiente ? '#4A7A34' : '#6E6E73',
+                        textTransform: 'uppercase', letterSpacing: '0.05em',
+                      }}
+                    >
+                      {esPendiente ? 'Pendiente' : 'Respondido'}
+                    </button>
+                  </div>
+
+                  {/* Campos en orden: petición, email, teléfono */}
+                  <p style={{ fontSize: 14, color: '#1D1D1F', margin: '0 0 12px', lineHeight: 1.6, background: 'rgba(0,0,0,0.025)', borderRadius: 10, padding: '12px 14px' }}>
+                    {m.mensaje}
+                  </p>
+                  <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+                    {m.email && (
+                      <a href={`mailto:${m.email}`}
+                        style={{ fontSize: 12.5, color: '#4A7A34', textDecoration: 'none', fontWeight: 500 }}>
+                        {m.email}
+                      </a>
+                    )}
+                    {m.telefono && (
+                      <a href={`tel:${m.telefono}`}
+                        style={{ fontSize: 12.5, color: '#6E6E73', textDecoration: 'none' }}>
+                        {m.telefono}
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── TAB: Métricas ─────────────────────────────────────────────── */}
+        {tab === 'metricas' && canAccess(session, 'metricas') && (
+          visitasError ? (
+            <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', maxWidth: 560 }}>
+              <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 10px' }}>Tracking de visitas no implementado</p>
+              <p style={{ color: '#6E6E73', fontSize: 14, margin: '0 0 16px', lineHeight: 1.6 }}>
+                La tabla <code style={{ background: 'rgba(0,0,0,0.06)', padding: '1px 6px', borderRadius: 4, fontSize: 12.5 }}>analytics_visitas</code> no existe o no tiene datos.
+                Para ver visitas reales necesitas dos pasos:
+              </p>
+              <ol style={{ color: '#6E6E73', fontSize: 14, margin: 0, paddingLeft: 20, lineHeight: 2 }}>
+                <li>Crear la tabla en Supabase (SQL en <code style={{ fontSize: 12 }}>supabase-dashboard.sql</code>)</li>
+                <li>Añadir un <code style={{ fontSize: 12 }}>INSERT</code> en cada página al montarse el componente</li>
+              </ol>
+            </div>
+          ) : visitas.length === 0 ? (
+            <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', color: '#6E6E73', fontSize: 14 }}>
+              La tabla existe pero no hay visitas registradas en los últimos 30 días.
+            </div>
+          ) : (
+            <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+              <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+                    <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Página</th>
+                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Visitas (30 d)</th>
+                    <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>%</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visitas.map(({ pagina, visitas: n }, i) => (
+                    <tr key={pagina} style={i < visitas.length - 1 ? ROW : undefined}>
+                      <td style={{ padding: '13px 16px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
+                      <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
+                      <td style={{ padding: '13px 16px', textAlign: 'right', color: '#6E6E73' }}>
+                        {totalVisitas ? ((n / totalVisitas) * 100).toFixed(1) : '0'}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
+
+        {/* ── TAB: Catálogo ─────────────────────────────────────────────── */}
         {tab === 'catalogo' && canAccess(session, 'catalogo') && (
           <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
             <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
@@ -219,12 +391,9 @@ export default function Dashboard() {
                 {productos.map((p, i) => {
                   const s = CAT_STYLES[p.categoria]
                   return (
-                    <tr
-                      key={p.id}
-                      style={i < productos.length - 1 ? ROW : undefined}
+                    <tr key={p.id} style={i < productos.length - 1 ? ROW : undefined}
                       onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.015)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                    >
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}>
                       <td style={{ padding: '14px 16px', fontWeight: 600 }}>{p.nombre}</td>
                       <td style={{ padding: '14px 16px' }}>
                         <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 100, background: s.pillBg, color: s.color }}>
@@ -242,16 +411,13 @@ export default function Dashboard() {
                             background: p.disponible ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
                             border: 'none', cursor: 'pointer', transition: 'background 0.15s',
                           }}
-                          aria-label={p.disponible ? 'Marcar como no disponible' : 'Marcar como disponible'}
-                        >
-                          <span
-                            style={{
-                              position: 'absolute', top: 2, left: 2, width: 16, height: 16,
-                              borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                              transition: 'transform 0.15s',
-                              transform: p.disponible ? 'translateX(16px)' : 'translateX(0)',
-                            }}
-                          />
+                          aria-label={p.disponible ? 'Marcar no disponible' : 'Marcar disponible'}>
+                          <span style={{
+                            position: 'absolute', top: 2, left: 2, width: 16, height: 16,
+                            borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                            transition: 'transform 0.15s',
+                            transform: p.disponible ? 'translateX(16px)' : 'translateX(0)',
+                          }} />
                         </button>
                       </td>
                     </tr>
@@ -262,64 +428,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* ── TAB: Mensajes ─────────────────────────────────────── */}
-        {tab === 'mensajes' && canAccess(session, 'mensajes') && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {MOCK_MENSAJES.map((m) => (
-              <div
-                key={m.id}
-                style={{
-                  borderRadius: 16, padding: '20px 22px', background: '#fff',
-                  border: m.leido ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(140,191,63,0.28)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-                  <div>
-                    <p style={{ fontWeight: 600, fontSize: 14, margin: '0 0 2px' }}>{m.floristeria}</p>
-                    <a href={`mailto:${m.email}`} style={{ fontSize: 12.5, color: '#6E6E73', textDecoration: 'none' }}>{m.email}</a>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                    {!m.leido && (
-                      <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: '#8CBF3F', color: '#fff', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        Nuevo
-                      </span>
-                    )}
-                    <span style={{ fontSize: 10, color: '#6E6E73', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                      {new Date(m.created_at).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                </div>
-                <p style={{ fontSize: 13.5, color: '#6E6E73', margin: 0, lineHeight: 1.6 }}>{m.mensaje}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* ── TAB: Métricas ─────────────────────────────────────── */}
-        {tab === 'metricas' && canAccess(session, 'metricas') && (
-          <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
-            <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                  <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Página</th>
-                  <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>Visitas (30 d)</th>
-                  <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MOCK_ANALYTICS.map(({ pagina, visitas }, i) => (
-                  <tr key={pagina} style={i < MOCK_ANALYTICS.length - 1 ? ROW : undefined}>
-                    <td style={{ padding: '13px 16px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
-                    <td style={{ padding: '13px 16px', textAlign: 'right', fontWeight: 700 }}>{visitas}</td>
-                    <td style={{ padding: '13px 16px', textAlign: 'right', color: '#6E6E73' }}>
-                      {((visitas / totalVisitas) * 100).toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
     </div>
   )

@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { supabase, supabaseReady } from '../../lib/supabase'
 import { MOCK_ACCOUNTS, saveSession } from '../../lib/auth'
 
+const ADMIN_EMAIL = 'admin@fernandezycalzada.com'
+
 export default function Login() {
   const nav = useNavigate()
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,13 +18,12 @@ export default function Login() {
 
     try {
       if (supabaseReady) {
-        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error: authErr } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password })
         if (authErr || !data.user) {
-          setError('Credenciales incorrectas.')
+          setError('Contraseña incorrecta.')
           return
         }
 
-        // Read role from profiles table
         const { data: profile, error: profileErr } = await supabase
           .from('profiles')
           .select('role, nombre')
@@ -36,14 +36,12 @@ export default function Login() {
           return
         }
 
-        // Session stored in Supabase Auth — no need to persist manually
-        // but we cache name+role so Dashboard can read it synchronously
         saveSession({ email: data.user.email, name: profile.nombre ?? data.user.email, role: profile.role })
         nav('/admin')
       } else {
-        const acc = MOCK_ACCOUNTS.find((a) => a.email === email && a.password === password)
+        const acc = MOCK_ACCOUNTS.find((a) => a.email === ADMIN_EMAIL && a.password === password)
         if (!acc) {
-          setError('Credenciales incorrectas.')
+          setError('Contraseña incorrecta.')
           return
         }
         saveSession({ email: acc.email, name: acc.name, role: acc.role })
@@ -63,7 +61,6 @@ export default function Login() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 380 }}>
-        {/* Brand mark */}
         <div style={{ textAlign: 'center', marginBottom: 36 }}>
           <img
             src="/logo-fc.png"
@@ -77,18 +74,6 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <label className="field-label">Email</label>
-            <input
-              className="field-input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              required
-              disabled={loading}
-            />
-          </div>
-          <div>
             <label className="field-label">Contraseña</label>
             <input
               className="field-input"
@@ -96,6 +81,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
+              autoFocus
               required
               disabled={loading}
             />
