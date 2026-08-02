@@ -3,7 +3,7 @@ import { NavLink, Link } from 'react-router-dom'
 
 const links = [
   { to: '/catalogo', label: 'Catálogo' },
-  { to: '/nosotros', label: 'Origen' },
+  { to: '/nosotros', label: 'Prensa' },
 ]
 
 export default function Nav() {
@@ -25,39 +25,29 @@ export default function Nav() {
   return (
     <header
       style={{
-        position: 'sticky',
-        top: 0,
-        zIndex: 50,
-        background: scrolled
-          ? 'rgba(251,251,253,0.85)'
-          : 'rgba(251,251,253,0.78)',
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
+        position: 'sticky', top: 0, zIndex: 50,
+        background: scrolled ? 'rgba(251,251,253,0.88)' : 'rgba(251,251,253,0.78)',
+        backdropFilter: 'blur(14px)', WebkitBackdropFilter: 'blur(14px)',
         borderBottom: '1px solid rgba(0,0,0,0.08)',
         transition: 'background 0.2s',
       }}
     >
       <div
         style={{
-          maxWidth: 1120,
-          margin: '0 auto',
-          padding: '0 24px',
-          height: 52,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          maxWidth: 1120, margin: '0 auto', padding: '0 24px',
+          height: 60, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}
       >
         {/* Brand */}
         <Link
           to="/"
           onClick={() => setOpen(false)}
-          style={{ display: 'flex', alignItems: 'center', gap: 8, fontWeight: 700, fontSize: 14.5, textDecoration: 'none', color: '#1D1D1F' }}
+          style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
         >
           <img
             src="/logo-fc.png"
             alt="Fernández y Calzada"
-            style={{ height: 28, width: 'auto', display: 'block' }}
+            style={{ height: 42, width: 'auto', display: 'block' }}
           />
         </Link>
 
@@ -68,17 +58,15 @@ export default function Nav() {
               key={to}
               to={to}
               style={({ isActive }) => ({
-                fontSize: 12.5,
-                fontWeight: 500,
+                fontSize: 13, fontWeight: 500,
                 color: isActive ? '#1D1D1F' : '#6E6E73',
-                textDecoration: 'none',
-                transition: 'color 0.1s',
+                textDecoration: 'none', transition: 'color 0.1s',
               })}
             >
               {label}
             </NavLink>
           ))}
-          <Link to="/contacto" className="btn btn-primary" style={{ fontSize: 12.5, padding: '7px 16px' }}>
+          <Link to="/contacto" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px' }}>
             Contactar
           </Link>
         </nav>
@@ -90,27 +78,9 @@ export default function Nav() {
           aria-label={open ? 'Cerrar menú' : 'Abrir menú'}
           style={{ background: 'none', border: 'none' }}
         >
-          <span
-            style={{
-              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
-              transition: 'transform 0.2s',
-              transform: open ? 'translateY(6.5px) rotate(45deg)' : 'none',
-            }}
-          />
-          <span
-            style={{
-              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
-              transition: 'opacity 0.2s',
-              opacity: open ? 0 : 1,
-            }}
-          />
-          <span
-            style={{
-              display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2,
-              transition: 'transform 0.2s',
-              transform: open ? 'translateY(-6.5px) rotate(-45deg)' : 'none',
-            }}
-          />
+          <span style={{ display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2, transition: 'transform 0.2s', transform: open ? 'translateY(6.5px) rotate(45deg)' : 'none' }} />
+          <span style={{ display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2, transition: 'opacity 0.2s', opacity: open ? 0 : 1 }} />
+          <span style={{ display: 'block', width: 20, height: 1.5, background: '#1D1D1F', borderRadius: 2, transition: 'transform 0.2s', transform: open ? 'translateY(-6.5px) rotate(-45deg)' : 'none' }} />
         </button>
       </div>
 
@@ -119,11 +89,9 @@ export default function Nav() {
         <div
           className="md:hidden"
           style={{
-            position: 'fixed', inset: 0, top: 52,
-            background: 'rgba(251,251,253,0.97)',
-            backdropFilter: 'blur(14px)',
-            display: 'flex', flexDirection: 'column',
-            padding: '32px 24px', gap: 4,
+            position: 'fixed', inset: 0, top: 60,
+            background: 'rgba(251,251,253,0.97)', backdropFilter: 'blur(14px)',
+            display: 'flex', flexDirection: 'column', padding: '32px 24px', gap: 4,
           }}
         >
           {links.map(({ to, label }) => (
@@ -134,8 +102,7 @@ export default function Nav() {
               style={({ isActive }) => ({
                 fontSize: 28, fontWeight: 700,
                 color: isActive ? '#1D1D1F' : '#6E6E73',
-                textDecoration: 'none',
-                padding: '8px 0',
+                textDecoration: 'none', padding: '8px 0',
               })}
             >
               {label}
