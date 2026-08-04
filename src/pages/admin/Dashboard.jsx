@@ -31,12 +31,6 @@ function fmtDate(iso) {
   return new Date(iso).toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
-function thisMonthStart() {
-  const d = new Date()
-  d.setDate(1)
-  d.setHours(0, 0, 0, 0)
-  return d
-}
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -55,6 +49,7 @@ export default function Dashboard() {
 
   // Tab — default 'mensajes', se ajusta tras cargar sesión si no hay acceso
   const [tab, setTab] = useState('mensajes')
+  const [searchMsg, setSearchMsg] = useState('')
 
   // ── Sesión ────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -165,9 +160,16 @@ export default function Dashboard() {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const pendientes = mensajes.filter((m) => (m.estado ?? 'pendiente') === 'pendiente').length
-  const respondidosMes = mensajes.filter((m) => m.estado === 'respondido' && new Date(m.created_at) >= thisMonthStart()).length
+  const respondidosTotal = mensajes.filter((m) => m.estado === 'respondido').length
   const totalVisitas = visitas.length
   const disponibles = productos.filter((p) => p.disponible).length
+
+  // Mensajes filtrados (búsqueda)
+  const filteredMensajes = mensajes.filter((m) => {
+    if (!searchMsg) return true
+    const q = searchMsg.toLowerCase()
+    return [m.floristeria, m.mensaje, m.email, m.telefono].some((f) => f?.toLowerCase().includes(q))
+  })
 
   // Agrupaciones para métricas
   const visitasPorPagina = Object.entries(
@@ -217,36 +219,22 @@ export default function Dashboard() {
 
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '36px 24px 80px' }}>
 
-        {/* ── Stats ─────────────────────────────────────────────────────── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 36 }}>
-          {canAccess(session, 'mensajes') && (
+        {/* ── Stats (2 tarjetas) ────────────────────────────────────────── */}
+        {canAccess(session, 'mensajes') && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 36 }}>
             <StatCard
-              label="Mensajes pendientes"
+              label="Pendientes"
               value={mensajesLoading ? '…' : pendientes}
               sub="sin responder"
               accent={pendientes > 0}
             />
-          )}
-          {canAccess(session, 'metricas') && (
             <StatCard
-              label="Visitas"
-              value={visitasError ? '—' : totalVisitas}
-              sub="últimos 30 días"
+              label="Respondidos"
+              value={mensajesLoading ? '…' : respondidosTotal}
+              sub="en total"
             />
-          )}
-          {canAccess(session, 'mensajes') && (
-            <StatCard
-              label="Respondidos este mes"
-              value={mensajesLoading ? '…' : respondidosMes}
-              sub="mensajes cerrados"
-            />
-          )}
-          <StatCard
-            label="Productos"
-            value={`${disponibles} / ${productos.length}`}
-            sub="disponibles"
-          />
-        </div>
+          </div>
+        )}
 
         {/* ── Tabs ──────────────────────────────────────────────────────── */}
         {TABS.length > 0 && (
@@ -269,6 +257,28 @@ export default function Dashboard() {
         {/* ── TAB: Mensajes ─────────────────────────────────────────────── */}
         {tab === 'mensajes' && canAccess(session, 'mensajes') && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Buscador */}
+            <div style={{ position: 'relative', maxWidth: 360 }}>
+              <svg
+                width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6E6E73" strokeWidth="2" strokeLinecap="round"
+                style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
+              >
+                <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="search"
+                value={searchMsg}
+                onChange={(e) => setSearchMsg(e.target.value)}
+                placeholder="Buscar por nombre, mensaje o email…"
+                style={{
+                  width: '100%', boxSizing: 'border-box',
+                  padding: '9px 12px 9px 34px', borderRadius: 12,
+                  border: '1px solid rgba(0,0,0,0.12)', background: '#fff',
+                  fontSize: 13.5, outline: 'none', color: '#1D1D1F',
+                }}
+              />
+            </div>
+
             {mensajesLoading && (
               <p style={{ color: '#6E6E73', fontSize: 14 }}>Cargando mensajes…</p>
             )}
@@ -277,7 +287,12 @@ export default function Dashboard() {
                 No hay mensajes todavía.
               </div>
             )}
-            {mensajes.map((m) => {
+            {!mensajesLoading && mensajes.length > 0 && filteredMensajes.length === 0 && (
+              <div style={{ padding: '40px 24px', textAlign: 'center', color: '#6E6E73', fontSize: 14, background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)' }}>
+                Sin resultados para "{searchMsg}".
+              </div>
+            )}
+            {filteredMensajes.map((m) => {
               const estado = m.estado ?? 'pendiente'
               const esPendiente = estado === 'pendiente'
               return (
@@ -347,60 +362,48 @@ export default function Dashboard() {
               Sin visitas registradas en los últimos 30 días. El tracking está activo — los datos aparecerán en cuanto lleguen visitas.
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', padding: '32px 32px 36px', maxWidth: 680 }}>
 
-              {/* Páginas más visitadas */}
-              <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
-                <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.02)' }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
-                    Páginas más visitadas · 30 días
-                  </span>
+              {/* Total — número grande */}
+              <div style={{ marginBottom: 36, display: 'flex', alignItems: 'baseline', gap: 12 }}>
+                <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>{totalVisitas}</span>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>visitas</div>
+                  <div style={{ fontSize: 12, color: '#6E6E73' }}>últimos 30 días</div>
                 </div>
-                <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {visitasPorPagina.map(({ pagina, n }, i) => (
-                      <tr key={pagina} style={i < visitasPorPagina.length - 1 ? ROW : undefined}>
-                        <td style={{ padding: '12px 18px', fontFamily: 'monospace', fontSize: 12.5, fontWeight: 600 }}>{pagina}</td>
-                        <td style={{ padding: '12px 18px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
-                        <td style={{ padding: '12px 18px', textAlign: 'right', color: '#6E6E73', minWidth: 52 }}>
-                          {((n / totalVisitas) * 100).toFixed(0)}%
-                        </td>
-                        <td style={{ padding: '12px 18px 12px 0', width: 80 }}>
-                          <div style={{ height: 5, borderRadius: 100, background: 'rgba(0,0,0,0.06)' }}>
-                            <div style={{ height: '100%', borderRadius: 100, background: '#8CBF3F', width: `${(n / totalVisitas) * 100}%` }} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
               </div>
 
-              {/* Origen del tráfico */}
-              <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
-                <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,0.06)', background: 'rgba(0,0,0,0.02)' }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
-                    Origen del tráfico · 30 días
-                  </span>
+              {/* Barra horizontal por página */}
+              <div style={{ marginBottom: 32 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73', marginBottom: 18 }}>
+                  Páginas más visitadas
                 </div>
-                <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
-                  <tbody>
-                    {visitasPorOrigen.map(({ cat, n }, i) => (
-                      <tr key={cat} style={i < visitasPorOrigen.length - 1 ? ROW : undefined}>
-                        <td style={{ padding: '12px 18px', fontWeight: 600 }}>{cat}</td>
-                        <td style={{ padding: '12px 18px', textAlign: 'right', fontWeight: 700 }}>{n}</td>
-                        <td style={{ padding: '12px 18px', textAlign: 'right', color: '#6E6E73', minWidth: 52 }}>
-                          {((n / totalVisitas) * 100).toFixed(0)}%
-                        </td>
-                        <td style={{ padding: '12px 18px 12px 0', width: 80 }}>
-                          <div style={{ height: 5, borderRadius: 100, background: 'rgba(0,0,0,0.06)' }}>
-                            <div style={{ height: '100%', borderRadius: 100, background: '#4A7A34', width: `${(n / totalVisitas) * 100}%` }} />
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                {visitasPorPagina.map(({ pagina, n }) => (
+                  <div key={pagina} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                    <div style={{ width: 88, flexShrink: 0, fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {pagina}
+                    </div>
+                    <div style={{ flex: 1, height: 9, borderRadius: 100, background: 'rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', borderRadius: 100, background: '#8CBF3F', width: `${(n / Math.max(...visitasPorPagina.map((x) => x.n))) * 100}%`, transition: 'width 0.5s ease' }} />
+                    </div>
+                    <div style={{ width: 30, flexShrink: 0, textAlign: 'right', fontWeight: 700, fontSize: 13.5 }}>{n}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Origen del tráfico — números pequeños */}
+              <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: 24 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73', marginBottom: 16 }}>
+                  Origen del tráfico
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 28 }}>
+                  {visitasPorOrigen.map(({ cat, n }) => (
+                    <div key={cat}>
+                      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 3 }}>{n}</div>
+                      <div style={{ fontSize: 11.5, color: '#6E6E73' }}>{cat}</div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
             </div>
@@ -410,6 +413,14 @@ export default function Dashboard() {
         {/* ── TAB: Catálogo ─────────────────────────────────────────────── */}
         {tab === 'catalogo' && canAccess(session, 'catalogo') && (
           <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+            <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
+                Catálogo
+              </span>
+              <span style={{ fontSize: 12, color: '#6E6E73' }}>
+                {disponibles} de {productos.length} disponibles
+              </span>
+            </div>
             <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
