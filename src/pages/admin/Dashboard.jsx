@@ -394,7 +394,7 @@ export default function Dashboard() {
 
         {/* ── TAB: Catálogo ─────────────────────────────────────────────── */}
         {tab === 'catalogo' && canAccess(session, 'catalogo') && (
-          <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, overflow: 'hidden', background: '#fff' }}>
+          <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, background: '#fff', overflow: 'hidden' }}>
             <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(0,0,0,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)' }}>
               <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73' }}>
                 Catálogo
@@ -403,7 +403,8 @@ export default function Dashboard() {
                 {disponibles} de {productos.length} disponibles
               </span>
             </div>
-            <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
+            <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: 520, fontSize: 13, borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
                   {['Producto', 'Categoría', 'Origen', 'Disponible'].map((h) => (
@@ -451,6 +452,7 @@ export default function Dashboard() {
                 })}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 

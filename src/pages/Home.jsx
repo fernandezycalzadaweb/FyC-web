@@ -362,7 +362,7 @@ export default function Home() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: 32 }}>
-            <Link to="/catalogo" className="btn btn-ghost">
+            <Link to="/catalogo" className="btn btn-ghost" style={{ whiteSpace: 'normal', maxWidth: '100%', textAlign: 'center', lineHeight: 1.4 }}>
               Ver catálogo completo ({productos.length} variedades) →
             </Link>
           </div>

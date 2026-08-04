@@ -5,6 +5,8 @@ const DEFAULT_TITLE = 'Fernández y Calzada · Mayorista de flor y planta · Sal
 const DEFAULT_DESC =
   'Mayoristas de flor cortada, planta y accesorios de floristería en Salamanca. Importación directa desde Colombia, Ecuador y Holanda. Entrega en 24–48 h.'
 
+const OG_IMAGE = `${BASE_URL}/og-image.jpg`
+
 export default function Seo({ title, description, path = '', schema }) {
   const fullTitle = title ? `${title} · Fernández y Calzada` : DEFAULT_TITLE
   const desc = description || DEFAULT_DESC
@@ -40,11 +42,15 @@ export default function Seo({ title, description, path = '', schema }) {
       <meta property="og:type" content="website" />
       <meta property="og:locale" content="es_ES" />
       <meta property="og:site_name" content="Fernández y Calzada" />
+      <meta property="og:image" content={OG_IMAGE} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
 
       {/* Twitter */}
-      <meta name="twitter:card" content="summary" />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={fullTitle} />
       <meta name="twitter:description" content={desc} />
+      <meta name="twitter:image" content={OG_IMAGE} />
 
       {/* Schema.org */}
       <script type="application/ld+json">
