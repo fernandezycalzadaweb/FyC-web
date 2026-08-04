@@ -113,7 +113,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!session) return
     if (!canAccess(session, tab === 'catalogo' ? 'catalogo' : tab)) {
-      const first = ['mensajes', 'metricas', 'catalogo'].find((f) => canAccess(session, f))
+      const first = ['mensajes', 'catalogo'].find((f) => canAccess(session, f))
       if (first) setTab(first)
     }
   }, [session])
@@ -180,11 +180,10 @@ export default function Dashboard() {
     visitas.reduce((acc, r) => { const c = classifyReferrer(r.referrer); acc[c] = (acc[c] || 0) + 1; return acc }, {})
   ).map(([cat, n]) => ({ cat, n })).sort((a, b) => b.n - a.n)
 
-  // ── Tabs (orden: Mensajes, Métricas, Catálogo) ────────────────────────────
+  // ── Tabs (Mensajes y Catálogo — Métricas vive en la cabecera) ───────────────
   const TABS = [
     { id: 'mensajes', label: `Mensajes${pendientes ? ` (${pendientes})` : ''}`, feature: 'mensajes' },
-    { id: 'metricas', label: 'Métricas',                                          feature: 'metricas' },
-    { id: 'catalogo', label: 'Catálogo',                                           feature: 'catalogo' },
+    { id: 'catalogo', label: 'Catálogo',                                          feature: 'catalogo' },
   ].filter((t) => canAccess(session, t.feature))
 
   return (
@@ -219,22 +218,67 @@ export default function Dashboard() {
 
       <div style={{ maxWidth: 1120, margin: '0 auto', padding: '36px 24px 80px' }}>
 
-        {/* ── Stats (2 tarjetas) ────────────────────────────────────────── */}
-        {canAccess(session, 'mensajes') && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 36 }}>
-            <StatCard
-              label="Pendientes"
-              value={mensajesLoading ? '…' : pendientes}
-              sub="sin responder"
-              accent={pendientes > 0}
-            />
-            <StatCard
-              label="Respondidos"
-              value={mensajesLoading ? '…' : respondidosTotal}
-              sub="en total"
-            />
-          </div>
-        )}
+        {/* ── Cabecera: 2 stats pequeños + tarjeta ancha de métricas ─── */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 36 }}>
+
+          {/* Columna izquierda: 2 tarjetas apiladas */}
+          {canAccess(session, 'mensajes') && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: '0 0 auto' }}>
+              <StatCard
+                label="Pendientes"
+                value={mensajesLoading ? '…' : pendientes}
+                sub="sin responder"
+                accent={pendientes > 0}
+              />
+              <StatCard
+                label="Respondidos"
+                value={mensajesLoading ? '…' : respondidosTotal}
+                sub="en total"
+              />
+            </div>
+          )}
+
+          {/* Tarjeta ancha de métricas */}
+          {canAccess(session, 'metricas') && (
+            <div style={{
+              flex: '1 1 300px',
+              background: 'rgba(140,191,63,0.05)',
+              border: '1.5px solid rgba(140,191,63,0.3)',
+              borderRadius: 16, padding: '20px 22px',
+            }}>
+              <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#4A7A34', margin: '0 0 6px' }}>
+                Visitas · 30 días
+              </p>
+              <p style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-0.03em', margin: '0 0 16px', lineHeight: 1, color: '#1D1D1F' }}>
+                {visitasError ? '—' : totalVisitas}
+              </p>
+
+              {/* Mini barras horizontales por página */}
+              {!visitasError && visitasPorPagina.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+                  {visitasPorPagina.map(({ pagina, n }) => {
+                    const max = visitasPorPagina[0].n
+                    return (
+                      <div key={pagina} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                        <div style={{ width: 72, flexShrink: 0, fontFamily: 'monospace', fontSize: 11, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {pagina}
+                        </div>
+                        <div style={{ flex: 1, height: 6, borderRadius: 100, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', borderRadius: 100, background: '#8CBF3F', width: `${(n / max) * 100}%` }} />
+                        </div>
+                        <div style={{ width: 24, flexShrink: 0, textAlign: 'right', fontSize: 11, fontWeight: 700 }}>{n}</div>
+                      </div>
+                    )
+                  })}
+                </div>
+              ) : visitasError ? (
+                <p style={{ fontSize: 12, color: '#6E6E73', margin: 0 }}>Sin conexión con analytics_visitas</p>
+              ) : (
+                <p style={{ fontSize: 12, color: '#6E6E73', margin: 0 }}>Tracking activo, esperando visitas…</p>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* ── Tabs ──────────────────────────────────────────────────────── */}
         {TABS.length > 0 && (
@@ -346,68 +390,6 @@ export default function Dashboard() {
               )
             })}
           </div>
-        )}
-
-        {/* ── TAB: Métricas ─────────────────────────────────────────────── */}
-        {tab === 'metricas' && canAccess(session, 'metricas') && (
-          visitasError ? (
-            <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', maxWidth: 560 }}>
-              <p style={{ fontWeight: 700, fontSize: 15, margin: '0 0 10px' }}>Error al conectar con analytics_visitas</p>
-              <p style={{ color: '#6E6E73', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
-                Comprueba que la tabla existe y que la política RLS permite lectura a roles autenticados.
-              </p>
-            </div>
-          ) : visitas.length === 0 ? (
-            <div style={{ padding: '40px 32px', background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', color: '#6E6E73', fontSize: 14 }}>
-              Sin visitas registradas en los últimos 30 días. El tracking está activo — los datos aparecerán en cuanto lleguen visitas.
-            </div>
-          ) : (
-            <div style={{ background: '#fff', borderRadius: 16, border: '1px solid rgba(0,0,0,0.08)', padding: '32px 32px 36px', maxWidth: 680 }}>
-
-              {/* Total — número grande */}
-              <div style={{ marginBottom: 36, display: 'flex', alignItems: 'baseline', gap: 12 }}>
-                <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>{totalVisitas}</span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600, color: '#1D1D1F' }}>visitas</div>
-                  <div style={{ fontSize: 12, color: '#6E6E73' }}>últimos 30 días</div>
-                </div>
-              </div>
-
-              {/* Barra horizontal por página */}
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73', marginBottom: 18 }}>
-                  Páginas más visitadas
-                </div>
-                {visitasPorPagina.map(({ pagina, n }) => (
-                  <div key={pagina} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-                    <div style={{ width: 88, flexShrink: 0, fontFamily: 'monospace', fontSize: 12, fontWeight: 700, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {pagina}
-                    </div>
-                    <div style={{ flex: 1, height: 9, borderRadius: 100, background: 'rgba(0,0,0,0.06)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', borderRadius: 100, background: '#8CBF3F', width: `${(n / Math.max(...visitasPorPagina.map((x) => x.n))) * 100}%`, transition: 'width 0.5s ease' }} />
-                    </div>
-                    <div style={{ width: 30, flexShrink: 0, textAlign: 'right', fontWeight: 700, fontSize: 13.5 }}>{n}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Origen del tráfico — números pequeños */}
-              <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: 24 }}>
-                <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', color: '#6E6E73', marginBottom: 16 }}>
-                  Origen del tráfico
-                </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 28 }}>
-                  {visitasPorOrigen.map(({ cat, n }) => (
-                    <div key={cat}>
-                      <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', lineHeight: 1.1, marginBottom: 3 }}>{n}</div>
-                      <div style={{ fontSize: 11.5, color: '#6E6E73' }}>{cat}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-            </div>
-          )
         )}
 
         {/* ── TAB: Catálogo ─────────────────────────────────────────────── */}

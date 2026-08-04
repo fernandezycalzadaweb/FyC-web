@@ -1,5 +1,6 @@
 import { useState, useEffect, Fragment } from 'react'
 import { Link } from 'react-router-dom'
+import { ComposableMap, Geographies, Geography, Marker, Line } from 'react-simple-maps'
 import Seo from '../components/Seo'
 import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
@@ -130,77 +131,100 @@ function CatalogRow({ product }) {
   )
 }
 
-// ── Mapa de origen ────────────────────────────────────────────────────────────
+// ── Mapa de origen (react-simple-maps + world-atlas topojson) ─────────────────
 const ORIGIN_KEYS = ['Colombia', 'Ecuador', 'Holanda', 'Nacional']
+
+const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json'
+
+// ISO 3166-1 numeric codes
+const HIGHLIGHTED = new Set([724, 528, 170, 218]) // España, Holanda, Colombia, Ecuador
+
+// [longitude, latitude]
+const PAISES = [
+  { coords: [-3.7, 40.4],  label: 'España',   isHub: true,  anchor: 'start' },
+  { coords: [4.9, 52.4],   label: 'Holanda',  isHub: false, anchor: 'start' },
+  { coords: [-74.1, 4.7],  label: 'Colombia', isHub: false, anchor: 'start' },
+  { coords: [-78.5, -0.2], label: 'Ecuador',  isHub: false, anchor: 'start' },
+]
+
+const RUTAS = [
+  { from: [4.9, 52.4],   to: [-3.7, 40.4], delay: '0s' },    // Holanda → España
+  { from: [-74.1, 4.7],  to: [-3.7, 40.4], delay: '0.6s' },  // Colombia → España
+  { from: [-78.5, -0.2], to: [-3.7, 40.4], delay: '1.2s' },  // Ecuador → España
+]
 
 function MapSVG() {
   return (
-    <svg viewBox="0 0 500 340" style={{ width: '100%', height: 'auto', display: 'block' }} aria-label="Mapa de rutas de origen">
+    <div style={{ borderRadius: 20, overflow: 'hidden', background: 'rgba(140,191,63,0.04)', border: '1px solid rgba(140,191,63,0.12)' }}>
+      <style>{`
+        @keyframes rsm-march { to { stroke-dashoffset: -18; } }
+      `}</style>
+      <ComposableMap
+        projection="geoMercator"
+        projectionConfig={{ scale: 130, center: [-28, 22] }}
+        width={800}
+        height={400}
+        style={{ width: '100%', height: 'auto', display: 'block' }}
+        aria-label="Mapa de rutas de origen"
+      >
+        <Geographies geography={GEO_URL}>
+          {({ geographies }) =>
+            geographies.map((geo) => (
+              <Geography
+                key={geo.rsmKey}
+                geography={geo}
+                fill={HIGHLIGHTED.has(geo.id) ? 'rgba(140,191,63,0.55)' : '#D6D6D6'}
+                stroke="#fff"
+                strokeWidth={0.5}
+                style={{ outline: 'none' }}
+              />
+            ))
+          }
+        </Geographies>
 
-      {/* Fondo oceánico */}
-      <rect width="500" height="340" rx="20" fill="rgba(140,191,63,0.04)" />
+        {/* Rutas animadas */}
+        {RUTAS.map((r, i) => (
+          <Line
+            key={i}
+            from={r.from}
+            to={r.to}
+            stroke="#4A7A34"
+            strokeWidth={1.6}
+            strokeDasharray="5,4"
+            strokeLinecap="round"
+            fill="none"
+            style={{ animation: `rsm-march 1.8s linear infinite`, animationDelay: r.delay }}
+          />
+        ))}
 
-      {/* Líneas de cuadrícula sutiles (sensación de mapa) */}
-      <line x1="0" y1="170" x2="500" y2="170" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-      <line x1="250" y1="0" x2="250" y2="340" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5" />
-
-      {/* ── MASAS DE TIERRA ── */}
-
-      {/* Continente SA — extensión esquina inferior-izquierda */}
-      <path
-        d="M 68,200 C 46,192 20,190 0,194 L 0,340 L 110,340 C 100,318 90,304 90,306 C 84,316 76,308 70,298 C 64,286 60,270 60,252 C 60,232 62,216 68,200 Z"
-        fill="rgba(140,191,63,0.08)"
-      />
-
-      {/* Colombia + Ecuador — masa principal (noroeste de SA) */}
-      <path
-        d="M 80,205 C 90,190 108,184 126,188 C 146,193 162,208 166,226 C 168,242 162,257 150,265 C 140,271 128,270 120,279 C 113,288 110,302 102,308 C 93,312 82,308 74,298 C 66,286 62,270 62,252 C 62,232 68,214 80,205 Z"
-        fill="rgba(140,191,63,0.16)" stroke="rgba(74,122,52,0.4)" strokeWidth="1.2"
-      />
-
-      {/* Europa continental — extensión esquina superior-derecha */}
-      <path
-        d="M 342,70 C 350,50 366,30 392,16 C 422,2 470,0 500,0 L 500,0 L 378,0 C 362,8 350,22 346,38 C 342,50 338,62 342,70 Z"
-        fill="rgba(140,191,63,0.08)"
-      />
-
-      {/* Península Ibérica (España) */}
-      <path
-        d="M 342,90 C 352,78 366,74 382,76 C 398,80 410,94 412,112 C 412,130 404,148 390,158 C 375,166 358,164 346,154 C 334,144 328,128 330,110 C 332,98 338,92 342,90 Z"
-        fill="rgba(140,191,63,0.16)" stroke="rgba(74,122,52,0.4)" strokeWidth="1.2"
-      />
-
-      {/* Países Bajos (Holanda) */}
-      <path
-        d="M 358,56 C 366,50 376,50 384,56 C 390,62 390,72 384,78 C 376,84 364,84 358,78 C 352,72 352,62 358,56 Z"
-        fill="rgba(140,191,63,0.16)" stroke="rgba(74,122,52,0.4)" strokeWidth="1.2"
-      />
-
-      {/* Costa atlántica Francia (conecta Holanda con Iberia) */}
-      <path
-        d="M 358,78 C 350,84 344,90 342,92"
-        fill="none" stroke="rgba(74,122,52,0.3)" strokeWidth="1"
-      />
-
-      {/* ── RUTAS ── */}
-      <path d="M 110 230 C 180 160 310 130 370 120" fill="none" stroke="#8CBF3F" strokeWidth="1.8" strokeDasharray="5 4" style={{ animation: 'route-flow 2s linear infinite' }} />
-      <path d="M 95 258 C 180 190 310 140 370 120" fill="none" stroke="#8CBF3F" strokeWidth="1.8" strokeDasharray="5 4" style={{ animation: 'route-flow 2.4s linear infinite' }} />
-      <path d="M 370 78 C 370 94 370 107 370 120" fill="none" stroke="#8CBF3F" strokeWidth="1.8" strokeDasharray="5 4" style={{ animation: 'route-flow 1.4s linear infinite' }} />
-
-      {/* ── PUNTOS ── */}
-      <circle cx="370" cy="120" r="10" fill="rgba(74,122,52,0.15)" />
-      <circle cx="370" cy="120" r="5" fill="#4A7A34" />
-      <circle cx="370" cy="68" r="4.5" fill="#6E6E73" />
-      <circle cx="110" cy="230" r="4.5" fill="#6E6E73" />
-      <circle cx="95" cy="258" r="4.5" fill="#6E6E73" />
-
-      {/* ── ETIQUETAS ── */}
-      <text x="384" y="124" fontSize="11" fill="#1D1D1F" fontFamily="Inter,sans-serif" fontWeight="600">España</text>
-      <text x="382" y="72" fontSize="10.5" fill="#6E6E73" fontFamily="Inter,sans-serif">Holanda</text>
-      <text x="120" y="234" fontSize="10.5" fill="#6E6E73" fontFamily="Inter,sans-serif">Colombia</text>
-      <text x="105" y="262" fontSize="10.5" fill="#6E6E73" fontFamily="Inter,sans-serif">Ecuador</text>
-
-    </svg>
+        {/* Marcadores */}
+        {PAISES.map(({ coords, label, isHub }) => (
+          <Marker key={label} coordinates={coords}>
+            {isHub ? (
+              <>
+                <circle r={8} fill="rgba(74,122,52,0.18)" />
+                <circle r={4.5} fill="#4A7A34" />
+              </>
+            ) : (
+              <circle r={3.5} fill="#6E6E73" />
+            )}
+            <text
+              textAnchor="start"
+              x={isHub ? 10 : 7}
+              y={isHub ? 4 : 4}
+              style={{
+                fontSize: isHub ? 10 : 9,
+                fontWeight: isHub ? 700 : 500,
+                fill: isHub ? '#1D1D1F' : '#6E6E73',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {label}
+            </text>
+          </Marker>
+        ))}
+      </ComposableMap>
+    </div>
   )
 }
 

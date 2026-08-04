@@ -132,13 +132,16 @@ export default function Catalogo() {
 
   useEffect(() => {
     if (!supabaseReady) return
+    const catOrder = Object.fromEntries(CATEGORIAS.map((c, i) => [c, i]))
     supabase
       .from('productos')
       .select('*')
       .eq('disponible', true)
-      .order('categoria')
       .then(({ data, error }) => {
-        if (!error && data?.length) setProductos(data)
+        if (!error && data?.length) {
+          data.sort((a, b) => (catOrder[a.categoria] ?? 99) - (catOrder[b.categoria] ?? 99))
+          setProductos(data)
+        }
       })
   }, [])
 

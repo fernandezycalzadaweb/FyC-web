@@ -1,4 +1,4 @@
-export const CATEGORIAS = ['Flor cortada', 'Verdes', 'Plantas', 'Accesorios']
+export const CATEGORIAS = ['Flor cortada', 'Plantas', 'Verdes', 'Accesorios']
 
 export const ORIGENES = ['Colombia', 'Ecuador', 'Holanda', 'Nacional']
 
@@ -250,6 +250,24 @@ const productos = [
     disponible: true,
   },
 
+  // ── Plantas ─────────────────────────────────────────────────────
+  {
+    id: 'pla-01',
+    nombre: 'Poinsetia',
+    categoria: 'Plantas',
+    origen: ['Holanda', 'Nacional'],
+    descripcion: 'Estrella de Navidad. Temporada de invierno. Varias variedades.',
+    disponible: true,
+  },
+  {
+    id: 'pla-02',
+    nombre: 'Hortensia (planta)',
+    categoria: 'Plantas',
+    origen: ['Holanda', 'Nacional'],
+    descripcion: 'Hortensia en maceta, floración de primavera y verano.',
+    disponible: true,
+  },
+
   // ── Verdes ──────────────────────────────────────────────────────
   {
     id: 'ver-01',
@@ -321,24 +339,6 @@ const productos = [
     categoria: 'Verdes',
     origen: ['Nacional'],
     descripcion: 'Hoja grande y robusta, perfecto para composiciones nupciales y fúnebres.',
-    disponible: true,
-  },
-
-  // ── Plantas ─────────────────────────────────────────────────────
-  {
-    id: 'pla-01',
-    nombre: 'Poinsetia',
-    categoria: 'Plantas',
-    origen: ['Holanda', 'Nacional'],
-    descripcion: 'Estrella de Navidad. Temporada de invierno. Varias variedades.',
-    disponible: true,
-  },
-  {
-    id: 'pla-02',
-    nombre: 'Hortensia (planta)',
-    categoria: 'Plantas',
-    origen: ['Holanda', 'Nacional'],
-    descripcion: 'Hortensia en maceta, floración de primavera y verano.',
     disponible: true,
   },
 

@@ -63,13 +63,15 @@ export default function AvisoLegal() {
 
         <Section title="Objeto">
           <Body>
-            Fernández y Calzada S.L. es una empresa dedicada a la importación y distribución mayorista
-            de flor cortada, planta y accesorios de floristería para profesionales del sector
-            (floristerías y viveros).
+            Fernández y Calzada S.L. es una empresa dedicada a la compra y distribución de flor
+            cortada, planta y accesorios de floristería para profesionales del sector (floristerías
+            y viveros). Opera desde sus instalaciones en Salamanca, desde donde distribuye género
+            adquirido en los principales mercados productores (Holanda, Colombia y Ecuador) así como
+            de origen nacional, adaptando cada pedido a las necesidades concretas de cada cliente.
           </Body>
           <Body>
             Este sitio web tiene carácter meramente informativo y de catálogo. No se realizan ventas
-            ni transacciones económicas a través de esta web.
+            ni transacciones económicas a través de esta web, ni se ofrece venta al público general.
           </Body>
         </Section>
 

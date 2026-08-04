@@ -73,12 +73,13 @@ function ContactLink({ href, children }) {
 }
 
 // ── Mapa OpenStreetMap ─────────────────────────────────────────────────────────
+// Coordenadas: Polígono Industrial El Tormes, Salamanca (sur de la ciudad)
 function MapEmbed() {
   return (
     <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.08)', marginTop: 6 }}>
       <iframe
         title="Localización Fernández y Calzada"
-        src="https://www.openstreetmap.org/export/embed.html?bbox=-5.676%2C40.956%2C-5.656%2C40.976&layer=mapnik&marker=40.966%2C-5.666"
+        src="https://www.openstreetmap.org/export/embed.html?bbox=-5.685%2C40.932%2C-5.648%2C40.958&layer=mapnik&marker=40.944%2C-5.664"
         width="100%"
         height="180"
         style={{ display: 'block', border: 'none' }}
@@ -156,33 +157,24 @@ export default function Contacto() {
                 </ContactLink>
               </ContactItem>
 
-              {/* WhatsApp — destacado */}
-              <div style={{
-                padding: '18px 20px', borderRadius: 16,
-                background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
-                display: 'flex', alignItems: 'center', gap: 14,
-              }}>
-                <div style={{
-                  width: 38, height: 38, borderRadius: 11, flexShrink: 0,
-                  background: 'rgba(37,211,102,0.12)', color: '#1e8449',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <IconWhatsApp />
+              {/* WhatsApp — mismo tratamiento que teléfono y email */}
+              <ContactItem icon={<IconWhatsApp />} label="WhatsApp">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: '#1D1D1F' }}>
+                    Responderemos lo más rápido posible
+                  </span>
+                  <a
+                    href={WA_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ fontSize: 12.5, fontWeight: 600, color: '#4A7A34', textDecoration: 'none', whiteSpace: 'nowrap' }}
+                    onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+                    onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+                  >
+                    Abrir →
+                  </a>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 700, marginBottom: 2 }}>WhatsApp</div>
-                  <div style={{ fontSize: 12.5, color: '#6E6E73' }}>Responderemos lo más rápido posible</div>
-                </div>
-                <a
-                  href={WA_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost"
-                  style={{ fontSize: 12.5, padding: '7px 14px', flexShrink: 0 }}
-                >
-                  Abrir →
-                </a>
-              </div>
+              </ContactItem>
 
               {/* Dirección + mapa */}
               <ContactItem icon={<IconPin />} label="Dirección">
