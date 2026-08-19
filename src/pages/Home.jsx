@@ -271,7 +271,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!supabaseReady) return
-    supabase.from('productos').select('*').eq('disponible', true)
+    supabase.from('productos').select('*').eq('visible', true)
       .then(({ data, error }) => { if (!error && data?.length) setProductos(data) })
   }, [])
 

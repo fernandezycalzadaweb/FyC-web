@@ -15,6 +15,7 @@ function origenStr(p) {
 function ProductCard({ product }) {
   const s = CAT_STYLES[product.categoria]
   const [imgOk, setImgOk] = useState(true)
+  const sinStock = product.en_stock === false
 
   return (
     <div
@@ -23,6 +24,7 @@ function ProductCard({ product }) {
         border: '1px solid rgba(0,0,0,0.07)',
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
         transition: 'box-shadow 0.15s, transform 0.15s',
+        opacity: sinStock ? 0.82 : 1,
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'
@@ -53,7 +55,7 @@ function ProductCard({ product }) {
             }}
           />
         )}
-        {/* Pill de categoría sobre la imagen */}
+        {/* Pill de categoría */}
         <span
           style={{
             position: 'absolute', top: 10, right: 10,
@@ -64,6 +66,19 @@ function ProductCard({ product }) {
         >
           {product.categoria}
         </span>
+        {/* Etiqueta sin stock */}
+        {sinStock && (
+          <span
+            style={{
+              position: 'absolute', bottom: 10, left: 10,
+              fontSize: 10, fontWeight: 700, padding: '4px 10px', borderRadius: 100,
+              background: 'rgba(201,138,31,0.92)', color: '#fff',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            Consultar disponibilidad
+          </span>
+        )}
       </div>
 
       {/* Texto */}
@@ -127,7 +142,7 @@ function StickyBar() {
 export default function Catalogo() {
   useTrackVisit('/catalogo')
 
-  const [productos, setProductos] = useState(productosStatic.filter((p) => p.disponible))
+  const [productos, setProductos] = useState(productosStatic.filter((p) => p.visible !== false && p.disponible !== false))
   const [filtro, setFiltro] = useState(TODOS)
 
   useEffect(() => {
@@ -136,7 +151,7 @@ export default function Catalogo() {
     supabase
       .from('productos')
       .select('*')
-      .eq('disponible', true)
+      .eq('visible', true)
       .then(({ data, error }) => {
         if (!error && data?.length) {
           data.sort((a, b) => (catOrder[a.categoria] ?? 99) - (catOrder[b.categoria] ?? 99))

@@ -125,15 +125,15 @@ export default function Dashboard() {
     navigate('/admin/login')
   }
 
-  // ── Toggle disponible (catálogo) ──────────────────────────────────────────
-  const toggleDisponible = async (id) => {
+  // ── Toggles de catálogo ───────────────────────────────────────────────────
+  const toggleCampo = async (id, campo) => {
     const producto = productos.find((p) => p.id === id)
     if (!producto) return
-    const nuevo = !producto.disponible
-    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: nuevo } : p)))
+    const nuevo = !producto[campo]
+    setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, [campo]: nuevo } : p)))
     if (supabaseReady) {
-      const { error } = await supabase.from('productos').update({ disponible: nuevo }).eq('id', id)
-      if (error) setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, disponible: !nuevo } : p)))
+      const { error } = await supabase.from('productos').update({ [campo]: nuevo }).eq('id', id)
+      if (error) setProductos((prev) => prev.map((p) => (p.id === id ? { ...p, [campo]: !nuevo } : p)))
     }
   }
 
@@ -162,7 +162,7 @@ export default function Dashboard() {
   const pendientes = mensajes.filter((m) => (m.estado ?? 'pendiente') === 'pendiente').length
   const respondidosTotal = mensajes.filter((m) => m.estado === 'respondido').length
   const totalVisitas = visitas.length
-  const disponibles = productos.filter((p) => p.disponible).length
+  const disponibles = productos.filter((p) => p.visible !== false).length
 
   // Mensajes filtrados (búsqueda)
   const filteredMensajes = mensajes.filter((m) => {
@@ -404,19 +404,27 @@ export default function Dashboard() {
               </span>
             </div>
             <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', minWidth: 520, fontSize: 13, borderCollapse: 'collapse' }}>
+            <table style={{ width: '100%', minWidth: 620, fontSize: 13, borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ background: 'rgba(0,0,0,0.025)', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                  {['Producto', 'Categoría', 'Origen', 'Disponible'].map((h) => (
-                    <th key={h} style={{ textAlign: h === 'Disponible' ? 'center' : 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>
+                  {['Producto', 'Categoría', 'Origen'].map((h) => (
+                    <th key={h} style={{ textAlign: 'left', padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73' }}>
                       {h}
                     </th>
                   ))}
+                  <th style={{ padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    En stock
+                  </th>
+                  <th style={{ padding: '12px 16px', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#6E6E73', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                    Visible en catálogo
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {productos.map((p, i) => {
                   const s = CAT_STYLES[p.categoria]
+                  const enStock = p.en_stock !== false
+                  const visible = p.visible !== false
                   return (
                     <tr key={p.id} style={i < productos.length - 1 ? ROW : undefined}
                       onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.015)')}
@@ -430,22 +438,55 @@ export default function Dashboard() {
                       <td style={{ padding: '14px 16px', color: '#6E6E73' }}>
                         {p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' · ')}
                       </td>
+                      {/* Switch: En stock */}
                       <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                        <button
-                          onClick={() => toggleDisponible(p.id)}
-                          style={{
-                            position: 'relative', width: 36, height: 20, borderRadius: 100,
-                            background: p.disponible ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
-                            border: 'none', cursor: 'pointer', transition: 'background 0.15s',
-                          }}
-                          aria-label={p.disponible ? 'Marcar no disponible' : 'Marcar disponible'}>
-                          <span style={{
-                            position: 'absolute', top: 2, left: 2, width: 16, height: 16,
-                            borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                            transition: 'transform 0.15s',
-                            transform: p.disponible ? 'translateX(16px)' : 'translateX(0)',
-                          }} />
-                        </button>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                          <button
+                            onClick={() => toggleCampo(p.id, 'en_stock')}
+                            style={{
+                              position: 'relative', width: 36, height: 20, borderRadius: 100,
+                              background: enStock ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
+                              border: 'none', cursor: 'pointer', transition: 'background 0.15s',
+                            }}
+                            aria-label={enStock ? 'Marcar sin stock' : 'Marcar en stock'}>
+                            <span style={{
+                              position: 'absolute', top: 2, left: 2, width: 16, height: 16,
+                              borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                              transition: 'transform 0.15s',
+                              transform: enStock ? 'translateX(16px)' : 'translateX(0)',
+                            }} />
+                          </button>
+                          {!enStock && (
+                            <span style={{ fontSize: 9, color: '#C98A1F', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                              Consultar
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      {/* Switch: Visible */}
+                      <td style={{ padding: '14px 16px', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                          <button
+                            onClick={() => toggleCampo(p.id, 'visible')}
+                            style={{
+                              position: 'relative', width: 36, height: 20, borderRadius: 100,
+                              background: visible ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
+                              border: 'none', cursor: 'pointer', transition: 'background 0.15s',
+                            }}
+                            aria-label={visible ? 'Ocultar en catálogo' : 'Mostrar en catálogo'}>
+                            <span style={{
+                              position: 'absolute', top: 2, left: 2, width: 16, height: 16,
+                              borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                              transition: 'transform 0.15s',
+                              transform: visible ? 'translateX(16px)' : 'translateX(0)',
+                            }} />
+                          </button>
+                          {!visible && (
+                            <span style={{ fontSize: 9, color: '#E0566E', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                              Oculto
+                            </span>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )

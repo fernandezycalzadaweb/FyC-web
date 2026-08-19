@@ -14,19 +14,36 @@ export default function Seo({ title, description, path = '', schema }) {
 
   const orgSchema = {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
+    '@type': 'LocalBusiness',
+    '@id': `${BASE_URL}/#business`,
     name: 'Fernández y Calzada S.L.',
     url: BASE_URL,
+    telephone: '+34923182222',
+    email: 'info@fernandezycalzada.com',
+    description: DEFAULT_DESC,
+    image: OG_IMAGE,
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Calle Río Tera 2',
       postalCode: '37003',
       addressLocality: 'Salamanca',
+      addressRegion: 'Castilla y León',
       addressCountry: 'ES',
     },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: 40.9671,
+      longitude: -5.6636,
+    },
+    openingHoursSpecification: [
+      { '@type': 'OpeningHoursSpecification', dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], opens: '08:00', closes: '17:00' },
+    ],
     taxID: 'B37319829',
-    areaServed: 'ES',
-    description: DEFAULT_DESC,
+    areaServed: {
+      '@type': 'AdministrativeArea',
+      name: 'España',
+    },
+    sameAs: [],
   }
 
   return (
