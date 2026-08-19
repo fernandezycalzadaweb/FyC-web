@@ -332,11 +332,37 @@ export default function Home() {
 
       {/* ── STATS ─────────────────────────────────────────────────── */}
       <section style={{ padding: '72px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
           {STATS.map(({ icon, display, label }) => (
-            <div key={display} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
-              <div style={{ marginBottom: 14, opacity: 0.9 }}>{icon}</div>
-              <div style={{ fontSize: 'clamp(15px,2vw,18px)', fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1.2, marginBottom: 6 }}>
+            <div
+              key={display}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+                background: 'rgba(140,191,63,0.05)',
+                border: '1px solid rgba(140,191,63,0.15)',
+                borderRadius: 16,
+                padding: '32px 24px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+                transition: 'box-shadow 0.2s, transform 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = '0 8px 28px rgba(0,0,0,0.10)'
+                e.currentTarget.style.transform = 'translateY(-3px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.05)'
+                e.currentTarget.style.transform = 'none'
+              }}
+            >
+              <div style={{
+                width: 56, height: 56, borderRadius: '50%',
+                background: 'rgba(140,191,63,0.14)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 18, flexShrink: 0,
+              }}>
+                {icon}
+              </div>
+              <div style={{ fontSize: 'clamp(15px,2vw,18px)', fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1.2, marginBottom: 8 }}>
                 {display}
               </div>
               <div style={{ fontSize: 13.5, color: '#6E6E73', lineHeight: 1.5, maxWidth: '18ch' }}>{label}</div>
