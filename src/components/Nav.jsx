@@ -94,7 +94,7 @@ export default function Nav() {
             maxWidth: 1120,
             margin: '0 auto',
             padding: '0 24px',
-            height: 60,
+            height: 76,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -104,12 +104,17 @@ export default function Nav() {
           <Link
             to="/"
             onClick={close}
-            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
+            style={{
+              display: 'flex', alignItems: 'center', textDecoration: 'none',
+              background: 'rgba(140,191,63,0.08)',
+              borderRadius: 14,
+              padding: '8px 16px',
+            }}
           >
             <img
               src="/logo-fc.png"
               alt="Fernández y Calzada"
-              style={{ height: 42, width: 'auto', display: 'block' }}
+              style={{ height: 56, width: 'auto', display: 'block' }}
             />
           </Link>
 

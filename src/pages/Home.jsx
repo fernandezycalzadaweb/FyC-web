@@ -32,6 +32,13 @@ function IconChat() {
     </svg>
   )
 }
+function IconLightning() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4A7A34" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+    </svg>
+  )
+}
 
 // ── Carrusel ──────────────────────────────────────────────────────────────────
 const HERO_IMAGES = [
@@ -102,31 +109,59 @@ function HeroCarousel() {
 }
 
 // ── Catálogo preview ──────────────────────────────────────────────────────────
-const PREVIEW_NAMES = ['Hortensia rosa', 'Hortensia azul', 'Tulipán', 'Peonía', 'Rosa', 'Eucalipto', 'Poinsetia', 'Envoltorios']
+const PREVIEW_NAMES = ['Anastasia / Cremón', 'Alstroemeria', 'Rosa', 'Mini Clavel']
 
-function CatalogRow({ product }) {
+function PreviewCard({ product }) {
   const s = CAT_STYLES[product.categoria]
   const [imgOk, setImgOk] = useState(true)
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 16, padding: '18px 4px', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-      {product.imagen && imgOk ? (
-        <img
-          src={product.imagen}
-          alt={product.nombre}
-          onError={() => setImgOk(false)}
-          style={{ width: 52, height: 52, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }}
-        />
-      ) : (
-        <div style={{ width: 52, height: 52, borderRadius: 12, flexShrink: 0, background: s.placeholderBg }} />
-      )}
-      <span style={{ fontWeight: 600, fontSize: 15.5, flex: 1 }}>{product.nombre}</span>
-      <span style={{ fontSize: 13.5, color: '#6E6E73' }} className="hidden sm:block">
-        {product.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')}
-      </span>
-      <span style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 100, background: s.pillBg, color: s.color, minWidth: 96, textAlign: 'center', flexShrink: 0 }}>
-        {product.categoria}
-      </span>
+    <div
+      style={{
+        background: '#fff', borderRadius: 20,
+        border: '1px solid rgba(0,0,0,0.07)',
+        overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        transition: 'box-shadow 0.15s, transform 0.15s',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'
+        e.currentTarget.style.transform = 'translateY(-2px)'
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.transform = 'none'
+      }}
+    >
+      <div style={{ position: 'relative', paddingBottom: '72%', flexShrink: 0 }}>
+        {product.imagen && imgOk ? (
+          <img
+            src={product.imagen}
+            alt={product.nombre}
+            onError={() => setImgOk(false)}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        ) : (
+          <div style={{ position: 'absolute', inset: 0, background: s.placeholderBg }} />
+        )}
+        <span
+          style={{
+            position: 'absolute', top: 10, right: 10,
+            fontSize: 10, fontWeight: 700, padding: '3px 9px', borderRadius: 100,
+            background: 'rgba(255,255,255,0.92)', color: s.color,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          {product.categoria}
+        </span>
+      </div>
+      <div style={{ padding: '14px 16px 16px', flex: 1 }}>
+        <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4, lineHeight: 1.3 }}>
+          {product.nombre}
+        </div>
+        <div style={{ fontSize: 12.5, color: '#6E6E73' }}>
+          {product.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')}
+        </div>
+      </div>
     </div>
   )
 }
@@ -248,15 +283,16 @@ export default function Home() {
   }))
 
   const STATS = [
+    { icon: <IconPackage />, display: 'A tu medida', size: 'clamp(17px,2.4vw,26px)', label: 'pedidos sin cantidad mínima' },
     { icon: <IconGlobe />, display: '3', size: 'clamp(40px,5.5vw,60px)', label: 'países de origen' },
-    { icon: <IconPackage />, display: 'A tu medida', size: 'clamp(18px,2.6vw,28px)', label: 'pedidos sin cantidad mínima' },
+    { icon: <IconLightning />, display: 'Envío express', size: 'clamp(16px,2.2vw,24px)', label: 'Pide por la mañana y recíbelo la misma tarde en Salamanca y provincias limítrofes' },
     { icon: <IconChat />, display: 'Trato directo', size: 'clamp(17px,2.4vw,26px)', label: 'respondemos tu solicitud de forma personal en el día' },
   ]
 
   const STEPS = [
-    { num: '1', title: 'Nos contactas',   text: 'Por nuestro formulario, email o teléfono, contándonos tus necesidades.' },
-    { num: '2', title: 'Te confirmamos',  text: 'Disponibilidad y precio de lo que necesites, en horas.' },
-    { num: '3', title: 'Lo recibes',      text: 'Envío express desde nuestras instalaciones en Salamanca.' },
+    { num: '1', title: 'Nos contactas',   text: 'Por nuestro teléfono, mail, WhatsApp o formulario.' },
+    { num: '2', title: 'Te confirmamos',  text: 'Disponibilidad y precio de lo que necesites.' },
+    { num: '3', title: 'Lo recibes',      text: 'Envío express a Salamanca y provincia.' },
   ]
 
   return (
@@ -267,7 +303,7 @@ export default function Home() {
       <header style={{ padding: '80px 0 0', textAlign: 'center' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
           <p style={{ fontSize: 13, fontWeight: 600, color: '#6E6E73', marginBottom: 12 }}>
-            Distribuidores de flor y planta · Salamanca
+            Distribuidor de flores naturales · Salamanca
           </p>
           <h1
             style={{
@@ -280,8 +316,7 @@ export default function Home() {
             <span style={{ color: '#4A7A34' }}>a tu medida.</span>
           </h1>
           <p style={{ fontSize: 17, color: '#6E6E73', maxWidth: '44ch', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Compramos flor y planta de calidad y la distribuimos desde Salamanca a floristerías
-            y viveros, en la cantidad que necesites.
+            Flor y planta de primera calidad, seleccionada en origen y servida desde Salamanca a tu medida.
           </p>
           <div style={{ marginBottom: 52 }}>
             <Link to="/contacto" className="btn btn-primary">
@@ -297,7 +332,7 @@ export default function Home() {
 
       {/* ── STATS ─────────────────────────────────────────────────── */}
       <section style={{ padding: '72px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 32 }}>
+        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
           {STATS.map(({ icon, display, size, label }) => (
             <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               <div style={{ marginBottom: 14, opacity: 0.9 }}>{icon}</div>
@@ -357,13 +392,19 @@ export default function Home() {
             </p>
           </div>
 
-          <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-            {preview.map((p) => <CatalogRow key={p.id} product={p} />)}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+              gap: 20,
+            }}
+          >
+            {preview.map((p) => <PreviewCard key={p.id} product={p} />)}
           </div>
 
-          <div style={{ textAlign: 'center', marginTop: 32 }}>
+          <div style={{ textAlign: 'center', marginTop: 40 }}>
             <Link to="/catalogo" className="btn btn-ghost" style={{ whiteSpace: 'normal', maxWidth: '100%', textAlign: 'center', lineHeight: 1.4 }}>
-              Ver catálogo completo ({productos.length} variedades) →
+              Ver catálogo completo →
             </Link>
           </div>
         </div>
@@ -372,29 +413,28 @@ export default function Home() {
       {/* ── DE DÓNDE VIENE (mapa de origen) ──────────────────────── */}
       <section style={{ padding: '88px 0' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
-          <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 800, letterSpacing: '-0.025em', margin: '0 0 48px' }}>
-            De dónde viene cada flor
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 56 }}>
-            <div>
-              <p style={{ fontSize: 16, color: '#6E6E73', margin: '0 0 32px', lineHeight: 1.65 }}>
-                Trabajamos directamente con productores en Colombia, Ecuador y Holanda,
-                y completamos la oferta con género nacional de temporada.
-              </p>
-              <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-                {origenesCounts.map(({ key, label, count }) => (
-                  <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
-                    <span style={{ fontWeight: 600, fontSize: 15 }}>{label}</span>
-                    <span style={{ fontSize: 13, color: '#6E6E73' }}>
-                      {count} {count === 1 ? 'variedad' : 'variedades'}
-                    </span>
-                  </div>
-                ))}
+          <div style={{ marginBottom: 40 }}>
+            <h2 style={{ fontSize: 'clamp(26px,4vw,40px)', fontWeight: 800, letterSpacing: '-0.025em', margin: '0 0 12px' }}>
+              De dónde viene cada flor
+            </h2>
+            <p style={{ fontSize: 16, color: '#6E6E73', margin: 0, lineHeight: 1.65 }}>
+              Trabajamos directamente con productores en Colombia, Ecuador y Holanda,
+              y completamos la oferta con género nacional de temporada.
+            </p>
+          </div>
+
+          {/* Mapa protagonista — ancho completo */}
+          <div style={{ marginBottom: 40 }}>
+            <MapSVG />
+          </div>
+
+          {/* Lista de países — horizontal, sin cifras */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 0', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+            {origenesCounts.map(({ key, label }) => (
+              <div key={key} style={{ flex: '1 1 150px', padding: '16px 0 16px 0', borderBottom: '1px solid rgba(0,0,0,0.08)', marginRight: 32 }}>
+                <span style={{ fontWeight: 600, fontSize: 15 }}>{label}</span>
               </div>
-            </div>
-            <div>
-              <MapSVG />
-            </div>
+            ))}
           </div>
         </div>
       </section>
