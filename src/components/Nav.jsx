@@ -82,10 +82,10 @@ export default function Nav() {
           position: 'sticky',
           top: 0,
           zIndex: 100,
-          background: scrolled ? 'rgba(251,251,253,0.92)' : 'rgba(251,251,253,0.82)',
+          background: scrolled ? 'rgba(245,250,235,0.95)' : 'rgba(245,250,235,0.88)',
           backdropFilter: 'blur(14px)',
           WebkitBackdropFilter: 'blur(14px)',
-          borderBottom: '1px solid rgba(0,0,0,0.08)',
+          borderBottom: '1px solid rgba(140,191,63,0.15)',
           transition: 'background 0.2s',
         }}
       >
@@ -104,12 +104,7 @@ export default function Nav() {
           <Link
             to="/"
             onClick={close}
-            style={{
-              display: 'flex', alignItems: 'center', textDecoration: 'none',
-              background: 'rgba(140,191,63,0.08)',
-              borderRadius: 14,
-              padding: '8px 16px',
-            }}
+            style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}
           >
             <img
               src="/logo-fc.png"

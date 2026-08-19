@@ -283,10 +283,10 @@ export default function Home() {
   }))
 
   const STATS = [
-    { icon: <IconPackage />, display: 'A tu medida', size: 'clamp(17px,2.4vw,26px)', label: 'pedidos sin cantidad mínima' },
-    { icon: <IconGlobe />, display: '3', size: 'clamp(40px,5.5vw,60px)', label: 'países de origen' },
-    { icon: <IconLightning />, display: 'Envío express', size: 'clamp(16px,2.2vw,24px)', label: 'Pide por la mañana y recíbelo la misma tarde en Salamanca y provincias limítrofes' },
-    { icon: <IconChat />, display: 'Trato directo', size: 'clamp(17px,2.4vw,26px)', label: 'respondemos tu solicitud de forma personal en el día' },
+    { icon: <IconPackage />, display: 'A tu medida', label: 'pedidos sin cantidad mínima' },
+    { icon: <IconGlobe />, display: '+3 países de origen', label: 'Colombia, Ecuador y Holanda' },
+    { icon: <IconLightning />, display: 'Envío express', label: 'Pide por la mañana y recíbelo la misma tarde en Salamanca y provincias limítrofes' },
+    { icon: <IconChat />, display: 'Trato directo', label: 'respondemos tu solicitud de forma personal en el día' },
   ]
 
   const STEPS = [
@@ -333,10 +333,10 @@ export default function Home() {
       {/* ── STATS ─────────────────────────────────────────────────── */}
       <section style={{ padding: '72px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
-          {STATS.map(({ icon, display, size, label }) => (
-            <div key={label} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          {STATS.map(({ icon, display, label }) => (
+            <div key={display} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               <div style={{ marginBottom: 14, opacity: 0.9 }}>{icon}</div>
-              <div style={{ fontSize: size, fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1.1, marginBottom: 6 }}>
+              <div style={{ fontSize: 'clamp(15px,2vw,18px)', fontWeight: 800, letterSpacing: '-0.02em', color: '#1D1D1F', lineHeight: 1.2, marginBottom: 6 }}>
                 {display}
               </div>
               <div style={{ fontSize: 13.5, color: '#6E6E73', lineHeight: 1.5, maxWidth: '18ch' }}>{label}</div>
@@ -353,10 +353,10 @@ export default function Home() {
               Así de fácil es pedir
             </h2>
           </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'stretch' }}>
             {STEPS.map((step, i) => (
               <Fragment key={step.num}>
-                <div style={{ flex: '1 1 190px', background: '#fff', borderRadius: 20, padding: '28px 24px', boxShadow: '0 2px 20px rgba(0,0,0,0.07)' }}>
+                <div style={{ flex: '1 1 190px', background: '#fff', borderRadius: 20, padding: '28px 24px', boxShadow: '0 2px 20px rgba(0,0,0,0.07)', display: 'flex', flexDirection: 'column' }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%',
                     background: '#4A7A34', color: '#fff',
@@ -370,7 +370,7 @@ export default function Home() {
                   <p style={{ color: '#6E6E73', fontSize: 14, margin: 0, lineHeight: 1.65 }}>{step.text}</p>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className="hidden md:flex" style={{ alignItems: 'center', paddingTop: 34, color: 'rgba(74,122,52,0.5)', fontSize: 24, flexShrink: 0 }}>
+                  <div className="hidden md:flex" style={{ alignItems: 'center', justifyContent: 'center', color: 'rgba(74,122,52,0.5)', fontSize: 24, flexShrink: 0 }}>
                     →
                   </div>
                 )}
