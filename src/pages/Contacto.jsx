@@ -104,13 +104,25 @@ export default function Contacto() {
     e.preventDefault()
     setStatus('loading')
     if (supabaseReady) {
-      const { error } = await supabase.from('mensajes_contacto').insert({
+      const payload = {
         nombre: form.floristeria,
         floristeria: form.floristeria,
         email: form.email || null,
         telefono: form.telefono || null,
         mensaje: form.mensaje,
-      })
+      }
+      const { error } = await supabase.from('mensajes_contacto').insert(payload)
+      if (!error) {
+        // Fire-and-forget: si falla el email de aviso no afecta al usuario
+        fetch('https://lwmnmzrjaxibyhxufsby.supabase.co/functions/v1/notify-mensaje', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify({ record: payload }),
+        }).catch(() => {})
+      }
       setStatus(error ? 'error' : 'ok')
     } else {
       setStatus('ok')
