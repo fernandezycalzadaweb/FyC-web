@@ -114,7 +114,7 @@ export default function Contacto() {
       const { error } = await supabase.from('mensajes_contacto').insert(payload)
       if (!error) {
         // Fire-and-forget: si falla el email de aviso no afecta al usuario
-        fetch('https://lwmnmzrjaxibyhxufsby.supabase.co/functions/v1/notify-mensaje', {
+        fetch('https://lwmnmzrjaxibyhxufsby.supabase.co/functions/v1/smooth-service', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
