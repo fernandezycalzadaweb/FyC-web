@@ -13,6 +13,7 @@ import AvisoLegal from './pages/AvisoLegal'
 import Privacidad from './pages/Privacidad'
 import Cookies from './pages/Cookies'
 import Producto from './pages/Producto'
+import QuienesSomos from './pages/QuienesSomos'
 
 export default function App() {
   return (
@@ -41,6 +42,7 @@ export default function App() {
                   <Route path="/catalogo" element={<Catalogo />} />
                   <Route path="/catalogo/:slug" element={<Producto />} />
                   <Route path="/nosotros" element={<Nosotros />} />
+                  <Route path="/quienes-somos" element={<QuienesSomos />} />
                   <Route path="/contacto" element={<Contacto />} />
                   <Route path="/aviso-legal" element={<AvisoLegal />} />
                   <Route path="/privacidad" element={<Privacidad />} />
