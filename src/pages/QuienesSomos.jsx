@@ -2,9 +2,24 @@ import Seo from '../components/Seo'
 import { useTrackVisit } from '../hooks/useTrackVisit'
 
 const HITOS = [
-  { etiqueta: 'Años 80', titulo: 'Fundación', texto: 'Nace Fernández y Calzada con el objetivo de traer flor de calidad desde Holanda a las floristerías españolas.' },
-  { etiqueta: 'Años 90', titulo: 'Expansión internacional', texto: 'Incorporamos Colombia, Ecuador, Kenia e Israel. La variedad y la calidad se multiplican.' },
-  { etiqueta: 'Hoy', titulo: 'Empresa familiar', texto: 'Seguimos en Salamanca, con servicio a toda España y los mismos principios de siempre.' },
+  {
+    etiqueta: 'Años 80',
+    titulo: 'Fundación',
+    texto: 'Nace Fernández y Calzada con el objetivo de traer flor de calidad desde Holanda a las floristerías españolas.',
+    imagen: '/images/historia/fundacion-anos80.jpg',
+  },
+  {
+    etiqueta: 'Años 90',
+    titulo: 'Expansión internacional',
+    texto: 'Incorporamos Colombia, Ecuador, Kenia e Israel. La variedad y la calidad se multiplican.',
+    imagen: '/images/historia/expansion-anos90.jpg',
+  },
+  {
+    etiqueta: 'Hoy',
+    titulo: 'Empresa familiar',
+    texto: 'Seguimos en Salamanca, con servicio a toda España y los mismos principios de siempre.',
+    imagen: null,
+  },
 ]
 
 const PARRAFOS = [
@@ -39,20 +54,16 @@ export default function QuienesSomos() {
           </p>
         </div>
 
-        {/* Layout: texto + hitos */}
+        {/*
+          Layout de dos columnas en desktop.
+          DOM: timeline primero, texto segundo.
+          En mobile → timeline arriba, texto abajo (orden natural del DOM).
+          En desktop → texto a la izquierda (order-1), timeline a la derecha (order-2).
+        */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 72, alignItems: 'start' }}>
 
-          {/* Columna de texto */}
-          <div style={{ maxWidth: 620 }}>
-            {PARRAFOS.map((p, i) => (
-              <p key={i} style={{ fontSize: 16.5, lineHeight: 1.75, color: i === 0 ? '#1D1D1F' : '#3A3A3C', margin: '0 0 20px', maxWidth: '65ch' }}>
-                {p}
-              </p>
-            ))}
-          </div>
-
-          {/* Columna de hitos */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {/* Columna de hitos — primero en DOM (= primero en móvil) */}
+          <div className="order-1 md:order-2" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {HITOS.map((h, i) => (
               <div key={h.etiqueta} style={{ display: 'flex', gap: 20, paddingBottom: 36, position: 'relative' }}>
                 {/* Línea vertical entre hitos */}
@@ -72,7 +83,7 @@ export default function QuienesSomos() {
                 }}>
                   <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#8CBF3F' }} />
                 </div>
-                <div style={{ paddingTop: 8 }}>
+                <div style={{ flex: 1, paddingTop: 8 }}>
                   <span style={{
                     display: 'inline-block', fontSize: 10, fontWeight: 800,
                     textTransform: 'uppercase', letterSpacing: '0.08em',
@@ -83,11 +94,31 @@ export default function QuienesSomos() {
                   <div style={{ fontSize: 15, fontWeight: 700, color: '#1D1D1F', marginBottom: 6 }}>
                     {h.titulo}
                   </div>
-                  <p style={{ fontSize: 13.5, color: '#6E6E73', margin: 0, lineHeight: 1.6, maxWidth: '28ch' }}>
+                  <p style={{ fontSize: 13.5, color: '#6E6E73', margin: '0 0 14px', lineHeight: 1.6 }}>
                     {h.texto}
                   </p>
+                  {h.imagen && (
+                    <img
+                      src={h.imagen}
+                      alt={`${h.etiqueta} — ${h.titulo}`}
+                      style={{
+                        width: '100%', borderRadius: 12, display: 'block',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
+                        objectFit: 'cover', maxHeight: 180,
+                      }}
+                    />
+                  )}
                 </div>
               </div>
+            ))}
+          </div>
+
+          {/* Columna de texto — segundo en DOM (= segundo en móvil) */}
+          <div className="order-2 md:order-1" style={{ maxWidth: 620 }}>
+            {PARRAFOS.map((p, i) => (
+              <p key={i} style={{ fontSize: 16.5, lineHeight: 1.75, color: i === 0 ? '#1D1D1F' : '#3A3A3C', margin: '0 0 20px', maxWidth: '65ch' }}>
+                {p}
+              </p>
             ))}
           </div>
 
