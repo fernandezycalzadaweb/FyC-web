@@ -76,14 +76,15 @@ function ContactLink({ href, children }) {
 // Coordenadas: Polígono Industrial El Tormes, Salamanca (sur de la ciudad)
 function MapEmbed() {
   return (
-    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.08)', marginTop: 6 }}>
+    <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.08)', marginTop: 6, height: 180 }}>
       <iframe
-        title="Localización Fernández y Calzada"
-        src="https://www.openstreetmap.org/export/embed.html?bbox=-5.685%2C40.932%2C-5.648%2C40.958&layer=mapnik&marker=40.944%2C-5.664"
+        title="Ubicación Fernández y Calzada"
+        src="https://www.google.com/maps?q=40.958199,-5.652120&z=16&output=embed"
         width="100%"
-        height="180"
-        style={{ display: 'block', border: 'none' }}
+        height="100%"
+        style={{ border: 0, display: 'block' }}
         loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
       />
     </div>
   )
