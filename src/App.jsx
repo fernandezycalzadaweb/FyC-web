@@ -12,6 +12,7 @@ import ProtectedRoute from './pages/admin/ProtectedRoute'
 import AvisoLegal from './pages/AvisoLegal'
 import Privacidad from './pages/Privacidad'
 import Cookies from './pages/Cookies'
+import Producto from './pages/Producto'
 
 export default function App() {
   return (
@@ -38,6 +39,7 @@ export default function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/catalogo" element={<Catalogo />} />
+                  <Route path="/catalogo/:slug" element={<Producto />} />
                   <Route path="/nosotros" element={<Nosotros />} />
                   <Route path="/contacto" element={<Contacto />} />
                   <Route path="/aviso-legal" element={<AvisoLegal />} />

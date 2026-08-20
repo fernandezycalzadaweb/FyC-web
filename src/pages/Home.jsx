@@ -2,7 +2,7 @@ import { useState, useEffect, Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { ComposableMap, Geographies, Geography, Marker, Line } from 'react-simple-maps'
 import Seo from '../components/Seo'
-import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../data/products'
+import productosStatic, { CAT_STYLES, ORIGEN_LABEL, toSlug } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
 
@@ -116,12 +116,17 @@ function PreviewCard({ product }) {
   const [imgOk, setImgOk] = useState(true)
 
   return (
+    <Link
+      to={`/catalogo/${toSlug(product.nombre)}`}
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+    >
     <div
       style={{
         background: '#fff', borderRadius: 20,
         border: '1px solid rgba(0,0,0,0.07)',
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
         transition: 'box-shadow 0.15s, transform 0.15s',
+        height: '100%',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'
@@ -163,6 +168,7 @@ function PreviewCard({ product }) {
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

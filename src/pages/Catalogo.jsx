@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Seo from '../components/Seo'
-import productosStatic, { CATEGORIAS, CAT_STYLES, ORIGEN_LABEL } from '../data/products'
+import productosStatic, { CATEGORIAS, CAT_STYLES, ORIGEN_LABEL, toSlug } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
 
@@ -18,6 +18,10 @@ function ProductCard({ product }) {
   const sinStock = product.en_stock === false
 
   return (
+    <Link
+      to={`/catalogo/${toSlug(product.nombre)}`}
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+    >
     <div
       style={{
         background: '#fff', borderRadius: 20,
@@ -25,6 +29,7 @@ function ProductCard({ product }) {
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
         transition: 'box-shadow 0.15s, transform 0.15s',
         opacity: sinStock ? 0.82 : 1,
+        height: '100%',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'
@@ -91,6 +96,7 @@ function ProductCard({ product }) {
         </div>
       </div>
     </div>
+    </Link>
   )
 }
 

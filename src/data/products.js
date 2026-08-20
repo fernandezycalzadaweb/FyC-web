@@ -1,3 +1,12 @@
+export function toSlug(nombre) {
+  return nombre
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
 export const CATEGORIAS = ['Flor cortada', 'Plantas', 'Verdes', 'Accesorios']
 
 export const ORIGENES = ['Colombia', 'Ecuador', 'Holanda', 'Nacional']
