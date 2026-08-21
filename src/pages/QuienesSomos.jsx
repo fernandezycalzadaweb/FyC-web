@@ -105,6 +105,7 @@ export default function QuienesSomos() {
                         width: '100%', borderRadius: 12, display: 'block',
                         boxShadow: '0 4px 20px rgba(0,0,0,0.12)',
                         objectFit: 'cover', maxHeight: 180,
+                        objectPosition: h.etiqueta === 'Años 80' ? 'top center' : 'center',
                       }}
                     />
                   )}
