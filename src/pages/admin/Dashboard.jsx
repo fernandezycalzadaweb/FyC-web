@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase, supabaseReady } from '../../lib/supabase'
 import { getSession, clearSession, canAccess, saveSession } from '../../lib/auth'
-import productosStatic, { CAT_STYLES, ORIGEN_LABEL } from '../../data/products'
+import productosStatic, { CAT_STYLES, ORIGEN_LABEL, toSlug } from '../../data/products'
 
 const ROW = { borderBottom: '1px solid rgba(0,0,0,0.08)' }
+const CAT_FALLBACK = { pillBg: 'rgba(0,0,0,0.08)', color: '#6E6E73' }
 
 function StatCard({ label, value, sub, accent }) {
   return (
@@ -180,6 +181,15 @@ export default function Dashboard() {
     visitas.reduce((acc, r) => { const c = classifyReferrer(r.referrer); acc[c] = (acc[c] || 0) + 1; return acc }, {})
   ).map(([cat, n]) => ({ cat, n })).sort((a, b) => b.n - a.n)
 
+  const productosTop = visitasPorPagina
+    .filter(({ pagina }) => pagina.startsWith('/catalogo/') && pagina.length > '/catalogo/'.length)
+    .map(({ pagina, n }) => {
+      const slug = pagina.slice('/catalogo/'.length)
+      const prod = productos.find((p) => toSlug(p.nombre) === slug)
+      return { nombre: prod?.nombre ?? slug, n }
+    })
+    .slice(0, 10)
+
   // ── Tabs (Mensajes y Catálogo — Métricas vive en la cabecera) ───────────────
   const TABS = [
     { id: 'mensajes', label: `Mensajes${pendientes ? ` (${pendientes})` : ''}`, feature: 'mensajes' },
@@ -275,6 +285,31 @@ export default function Dashboard() {
                 <p style={{ fontSize: 12, color: '#6E6E73', margin: 0 }}>Sin conexión con analytics_visitas</p>
               ) : (
                 <p style={{ fontSize: 12, color: '#6E6E73', margin: 0 }}>Tracking activo, esperando visitas…</p>
+              )}
+
+              {/* Productos más vistos */}
+              {!visitasError && productosTop.length > 0 && (
+                <div style={{ marginTop: 20, paddingTop: 16, borderTop: '1px solid rgba(140,191,63,0.2)' }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#4A7A34', margin: '0 0 10px' }}>
+                    Productos más vistos
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                    {productosTop.map(({ nombre, n }) => {
+                      const max = productosTop[0].n
+                      return (
+                        <div key={nombre} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                          <div style={{ flex: 1, fontFamily: 'monospace', fontSize: 11, fontWeight: 600, color: '#1D1D1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {nombre}
+                          </div>
+                          <div style={{ width: 60, flexShrink: 0, height: 6, borderRadius: 100, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', borderRadius: 100, background: '#C9A227', width: `${(n / max) * 100}%` }} />
+                          </div>
+                          <div style={{ width: 24, flexShrink: 0, textAlign: 'right', fontSize: 11, fontWeight: 700 }}>{n}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           )}
@@ -422,7 +457,7 @@ export default function Dashboard() {
               </thead>
               <tbody>
                 {productos.map((p, i) => {
-                  const s = CAT_STYLES[p.categoria]
+                  const s = CAT_STYLES[p.categoria] ?? CAT_FALLBACK
                   const enStock = p.en_stock !== false
                   const visible = p.visible !== false
                   return (

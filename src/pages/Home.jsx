@@ -109,10 +109,12 @@ function HeroCarousel() {
 }
 
 // ── Catálogo preview ──────────────────────────────────────────────────────────
-const PREVIEW_NAMES = ['Anastasia / Cremón', 'Alstroemeria', 'Rosa', 'Mini Clavel']
+const PREVIEW_NAMES = ['Anastasia', 'Alstroemeria', 'Rosa Roja', 'Mini Clavel']
+
+const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
 function PreviewCard({ product }) {
-  const s = CAT_STYLES[product.categoria]
+  const s = CAT_STYLES[product.categoria] ?? CAT_FALLBACK
   const [imgOk, setImgOk] = useState(true)
 
   return (
@@ -285,7 +287,7 @@ export default function Home() {
 
   const origenesCounts = ORIGIN_KEYS.map((key) => ({
     key, label: ORIGEN_LABEL[key],
-    count: productos.filter((p) => p.origen.includes(key)).length,
+    count: productos.filter((p) => Array.isArray(p.origen) && p.origen.includes(key)).length,
   }))
 
   const STATS = [

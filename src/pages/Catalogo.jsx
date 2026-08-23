@@ -9,11 +9,22 @@ const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
 
 function origenStr(p) {
-  return p.origen.map((o) => ORIGEN_LABEL[o] || o).join(' / ')
+  return (Array.isArray(p.origen) ? p.origen : []).map((o) => ORIGEN_LABEL[o] || o).join(' / ')
 }
 
+function sortProductos(lista) {
+  const catOrder = Object.fromEntries(CATEGORIAS.map((c, i) => [c, i]))
+  return [...lista].sort((a, b) => {
+    const catDiff = (catOrder[a.categoria] ?? 99) - (catOrder[b.categoria] ?? 99)
+    if (catDiff !== 0) return catDiff
+    return a.nombre.localeCompare(b.nombre, 'es')
+  })
+}
+
+const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
+
 function ProductCard({ product }) {
-  const s = CAT_STYLES[product.categoria]
+  const s = CAT_STYLES[product.categoria] ?? CAT_FALLBACK
   const [imgOk, setImgOk] = useState(true)
   const sinStock = product.en_stock === false
 
@@ -148,21 +159,19 @@ function StickyBar() {
 export default function Catalogo() {
   useTrackVisit('/catalogo')
 
-  const [productos, setProductos] = useState(productosStatic.filter((p) => p.visible !== false && p.disponible !== false))
+  const [productos, setProductos] = useState(
+    sortProductos(productosStatic.filter((p) => p.visible !== false && p.disponible !== false))
+  )
   const [filtro, setFiltro] = useState(TODOS)
 
   useEffect(() => {
     if (!supabaseReady) return
-    const catOrder = Object.fromEntries(CATEGORIAS.map((c, i) => [c, i]))
     supabase
       .from('productos')
       .select('*')
       .eq('visible', true)
       .then(({ data, error }) => {
-        if (!error && data?.length) {
-          data.sort((a, b) => (catOrder[a.categoria] ?? 99) - (catOrder[b.categoria] ?? 99))
-          setProductos(data)
-        }
+        if (!error && data?.length) setProductos(sortProductos(data))
       })
   }, [])
 

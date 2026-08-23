@@ -46,7 +46,7 @@ const productos = [
   // ── Flor cortada · Colombia / Ecuador ──────────────────────────
   {
     id: 'col-01',
-    nombre: 'Rosa',
+    nombre: 'Rosa Roja',
     categoria: 'Flor cortada',
     origen: ['Colombia', 'Ecuador'],
     descripcion: 'Variedades estándar y premium, tallo largo, disponible todo el año.',
@@ -62,10 +62,18 @@ const productos = [
   },
   {
     id: 'col-03',
-    nombre: 'Anastasia / Cremón',
+    nombre: 'Anastasia',
     categoria: 'Flor cortada',
     origen: ['Colombia'],
-    descripcion: 'Crisantemo de rama de origen colombiano, tono cálido y gran volumen.',
+    descripcion: 'Crisantemo de rama de origen colombiano, cabeza pequeña y gran volumen.',
+    disponible: true,
+  },
+  {
+    id: 'col-03b',
+    nombre: 'Cremón',
+    categoria: 'Flor cortada',
+    origen: ['Colombia'],
+    descripcion: 'Crisantemo de rama grande, tono cálido muy solicitado en composiciones.',
     disponible: true,
   },
   {
