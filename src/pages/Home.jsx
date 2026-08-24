@@ -42,10 +42,10 @@ function IconLightning() {
 
 // ── Carrusel ──────────────────────────────────────────────────────────────────
 const HERO_IMAGES = [
-  { src: '/images/hero/0449.jpg', label: 'Eryngium · Holanda',      position: 'center 40%' },
-  { src: '/images/hero/0445.jpg', label: 'Poinsetia · Nacional',    position: 'center 45%' },
-  { src: '/images/hero/0443.jpg', label: 'Alstroemeria · Colombia', position: 'center 30%' },
-  { src: '/images/hero/0440.jpg', label: 'Clavel · Colombia',       position: 'center 18%' },
+  { src: '/images/hero/0449.jpg', label: 'Eryngium · Holanda',      position: 'center center' },
+  { src: '/images/hero/0445.jpg', label: 'Poinsetia · Nacional',    position: 'center center' },
+  { src: '/images/hero/0443.jpg', label: 'Alstroemeria · Colombia', position: 'center center' },
+  { src: '/images/hero/0440.jpg', label: 'Clavel · Colombia',       position: 'center center' },
 ]
 
 function HeroCarousel() {
