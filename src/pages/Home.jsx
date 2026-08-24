@@ -61,7 +61,7 @@ function HeroCarousel() {
     <div
       style={{
         position: 'relative', borderRadius: 28, overflow: 'hidden',
-        height: 'clamp(400px, 75vw, 680px)',
+        aspectRatio: '5/6',
         boxShadow: '0 30px 60px -30px rgba(0,0,0,0.25)',
       }}
     >
@@ -310,34 +310,45 @@ export default function Home() {
     <>
       <Seo path="/" />
 
-      {/* ── HERO ──────────────────────────────────────────────────── */}
-      <header style={{ padding: '80px 0 0', textAlign: 'center' }}>
+      {/* ── HERO — dos columnas: texto izquierda, foto derecha ────── */}
+      <header style={{ padding: '80px 0 72px' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#6E6E73', marginBottom: 12 }}>
-            Distribuidor de flores naturales · Salamanca
-          </p>
-          <h1
-            style={{
-              fontSize: 'clamp(32px, 5.5vw, 72px)',
-              fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05,
-              margin: '0 auto 16px', maxWidth: '18ch',
-            }}
-          >
-            Desde Holanda, Colombia y Ecuador,{' '}
-            <span style={{ color: '#4A7A34' }}>a tu medida.</span>
-          </h1>
-          <p style={{ fontSize: 17, color: '#6E6E73', maxWidth: '44ch', margin: '0 auto 32px', lineHeight: 1.6 }}>
-            Flor y planta de primera calidad, seleccionada en origen y servida desde Salamanca a tu medida.
-          </p>
-          <div style={{ marginBottom: 52 }}>
-            <Link to="/contacto" className="btn btn-primary">
-              Contáctanos
-            </Link>
-          </div>
-        </div>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: 'clamp(40px, 6vw, 72px)',
+            alignItems: 'center',
+          }}>
 
-        <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
-          <HeroCarousel />
+            {/* Columna de texto */}
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#6E6E73', marginTop: 0, marginBottom: 16 }}>
+                Distribuidor de flores naturales · Salamanca
+              </p>
+              <h1 style={{
+                fontSize: 'clamp(30px, 4vw, 58px)',
+                fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.05,
+                margin: '0 0 20px',
+              }}>
+                Desde Holanda, Colombia y Ecuador,{' '}
+                <span style={{ color: '#4A7A34' }}>a tu medida.</span>
+              </h1>
+              <p style={{ fontSize: 17, color: '#6E6E73', margin: '0 0 36px', lineHeight: 1.6 }}>
+                Flor y planta de primera calidad, seleccionada en origen y servida desde Salamanca a tu medida.
+              </p>
+              <Link to="/contacto" className="btn btn-primary">
+                Contáctanos
+              </Link>
+            </div>
+
+            {/* Columna del carrusel — ancho máximo 500px, centrado */}
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '100%', maxWidth: 500 }}>
+                <HeroCarousel />
+              </div>
+            </div>
+
+          </div>
         </div>
       </header>
 
