@@ -4,6 +4,7 @@ import Seo from '../components/Seo'
 import productosStatic, { CATEGORIAS, CAT_STYLES, ORIGEN_LABEL, toSlug } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
+import { useCesta } from '../context/CestaContext'
 
 const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
@@ -27,6 +28,8 @@ function ProductCard({ product }) {
   const s = CAT_STYLES[product.categoria] ?? CAT_FALLBACK
   const [imgOk, setImgOk] = useState(true)
   const sinStock = product.en_stock === false
+  const { has, toggle } = useCesta()
+  const inCesta = has(product.nombre)
 
   return (
     <Link
@@ -98,13 +101,26 @@ function ProductCard({ product }) {
       </div>
 
       {/* Texto */}
-      <div style={{ padding: '14px 16px 16px', flex: 1 }}>
+      <div style={{ padding: '14px 16px 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4, lineHeight: 1.3 }}>
           {product.nombre}
         </div>
-        <div style={{ fontSize: 12.5, color: '#6E6E73' }}>
+        <div style={{ fontSize: 12.5, color: '#6E6E73', marginBottom: 10 }}>
           {origenStr(product)}
         </div>
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(product.nombre) }}
+          style={{
+            alignSelf: 'flex-start',
+            padding: '4px 11px', borderRadius: 100, fontSize: 11.5, fontWeight: 700,
+            border: `1px solid ${inCesta ? '#8CBF3F' : 'rgba(140,191,63,0.55)'}`,
+            background: inCesta ? '#8CBF3F' : 'transparent',
+            color: inCesta ? '#fff' : '#4A7A34',
+            cursor: 'pointer', transition: 'background 0.15s, border-color 0.15s',
+          }}
+        >
+          {inCesta ? '✓ Añadido' : '+ Añadir'}
+        </button>
       </div>
     </div>
     </Link>

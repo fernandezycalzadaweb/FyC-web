@@ -3,6 +3,8 @@ import { HelmetProvider } from 'react-helmet-async'
 import { useEffect } from 'react'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
+import CestaBar from './components/CestaBar'
+import { CestaProvider } from './context/CestaContext'
 import Home from './pages/Home'
 import Catalogo from './pages/Catalogo'
 import Nosotros from './pages/Nosotros'
@@ -42,7 +44,7 @@ export default function App() {
         <Route
           path="/*"
           element={
-            <>
+            <CestaProvider>
               <Nav />
               <main>
                 <Routes>
@@ -58,8 +60,9 @@ export default function App() {
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
+              <CestaBar />
               <Footer />
-            </>
+            </CestaProvider>
           }
         />
       </Routes>

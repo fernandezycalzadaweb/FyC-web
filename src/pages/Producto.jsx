@@ -4,6 +4,7 @@ import Seo from '../components/Seo'
 import productosStatic, { CAT_STYLES, ORIGEN_LABEL, toSlug } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
+import { useCesta } from '../context/CestaContext'
 
 const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
@@ -102,6 +103,9 @@ export default function Producto() {
     )
   }
 
+  const { has, toggle } = useCesta()
+  const inCesta = has(producto.nombre)
+
   const s = CAT_STYLES[producto.categoria] ?? CAT_FALLBACK
   const origen = origenStr(producto)
   const color = producto.color ?? null
@@ -193,10 +197,24 @@ export default function Producto() {
               />
             </div>
 
-            {/* CTA único */}
-            <Link to="/contacto" className="btn btn-primary" style={{ textAlign: 'center', display: 'block' }}>
-              Comprobar disponibilidad
-            </Link>
+            {/* CTAs */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <Link to="/contacto" className="btn btn-primary" style={{ textAlign: 'center', display: 'block' }}>
+                Comprobar disponibilidad
+              </Link>
+              <button
+                onClick={() => toggle(producto.nombre)}
+                style={{
+                  padding: '13px 20px', borderRadius: 100, fontSize: 14, fontWeight: 700,
+                  border: `1.5px solid ${inCesta ? '#4A7A34' : 'rgba(140,191,63,0.55)'}`,
+                  background: inCesta ? 'rgba(140,191,63,0.12)' : 'transparent',
+                  color: '#4A7A34', cursor: 'pointer', textAlign: 'center',
+                  transition: 'background 0.15s, border-color 0.15s',
+                }}
+              >
+                {inCesta ? '✓ Añadido a la consulta' : '+ Añadir a la consulta'}
+              </button>
+            </div>
 
           </div>
         </div>
