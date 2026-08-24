@@ -8,6 +8,8 @@ function buildWaUrl(items) {
     'Hola, querría consultar disponibilidad de:',
     ...items.map((n) => `- ${n}`),
     '',
+    'Indícanos también tu floristería si es la primera vez que nos escribís.',
+    '',
     'Gracias.',
   ].join('\n')
   return `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`
