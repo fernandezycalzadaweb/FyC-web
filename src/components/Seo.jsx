@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async'
 
-const BASE_URL = 'https://www.fernandezycalzada.com'
+const BASE_URL = 'https://fernandezycalzada.com'
 const DEFAULT_TITLE = 'Fernández y Calzada · Mayorista de flor y planta · Salamanca'
 const DEFAULT_DESC =
   'Mayoristas de flor cortada, planta y accesorios de floristería en Salamanca. Importación directa desde Colombia, Ecuador y Holanda. Entrega en 24–48 h.'
