@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
+import { useEffect } from 'react'
 import Nav from './components/Nav'
 import Footer from './components/Footer'
 import Home from './pages/Home'
@@ -15,9 +16,16 @@ import Cookies from './pages/Cookies'
 import Producto from './pages/Producto'
 import QuienesSomos from './pages/QuienesSomos'
 
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => { window.scrollTo(0, 0) }, [pathname])
+  return null
+}
+
 export default function App() {
   return (
     <HelmetProvider>
+      <ScrollToTop />
       <Routes>
         {/* Admin — layout propio, sin Nav/Footer públicos */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -47,6 +55,7 @@ export default function App() {
                   <Route path="/aviso-legal" element={<AvisoLegal />} />
                   <Route path="/privacidad" element={<Privacidad />} />
                   <Route path="/cookies" element={<Cookies />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </main>
               <Footer />

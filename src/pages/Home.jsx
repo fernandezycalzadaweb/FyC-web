@@ -42,8 +42,10 @@ function IconLightning() {
 
 // ── Carrusel ──────────────────────────────────────────────────────────────────
 const HERO_IMAGES = [
-  { src: '/images/productos/hortensia-rosa.jpg', label: 'Hortensia rosa · Colombia' },
-  { src: '/images/productos/hortensia-azul.jpg', label: 'Hortensia azul · Colombia' },
+  { src: '/images/hero/0449.jpg', label: 'Eryngium · Holanda',       position: 'center 35%' },
+  { src: '/images/hero/0445.jpg', label: 'Poinsetia · Nacional',     position: 'center 40%' },
+  { src: '/images/hero/0443.jpg', label: 'Alstroemeria · Colombia',  position: 'center 30%' },
+  { src: '/images/hero/0440.jpg', label: 'Clavel · Colombia',        position: 'center 22%' },
 ]
 
 function HeroCarousel() {
@@ -71,6 +73,7 @@ function HeroCarousel() {
           style={{
             position: 'absolute', inset: 0,
             width: '100%', height: '100%', objectFit: 'cover',
+            objectPosition: img.position,
             opacity: i === current ? 1 : 0,
             transition: 'opacity 0.9s ease',
           }}
