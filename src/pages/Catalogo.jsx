@@ -130,19 +130,21 @@ function ProductCard({ product }) {
 // Barra flotante inferior — se puede cerrar
 function StickyBar() {
   const [visible, setVisible] = useState(true)
+  const { count } = useCesta()
 
   if (!visible) return null
 
   return (
     <div
       style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
+        position: 'fixed', bottom: count > 0 ? 60 : 0, left: 0, right: 0,
         zIndex: 40,
         background: 'rgba(29,29,31,0.96)', backdropFilter: 'blur(12px)',
         borderTop: '1px solid rgba(255,255,255,0.08)',
         padding: '14px 24px',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
         flexWrap: 'wrap',
+        transition: 'bottom 0.25s ease',
       }}
     >
       <span style={{ color: 'rgba(255,255,255,0.82)', fontSize: 14, fontWeight: 500 }}>
