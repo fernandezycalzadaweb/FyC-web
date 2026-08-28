@@ -9,6 +9,12 @@ import { useCesta } from '../context/CestaContext'
 const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
 
+const PAISES_GRUPOS = [
+  { label: 'Colombia / Ecuador', keys: ['Colombia', 'Ecuador'] },
+  { label: 'Holanda',            keys: ['Holanda'] },
+  { label: 'Nacional',           keys: ['Nacional'] },
+]
+
 function origenStr(p) {
   return (Array.isArray(p.origen) ? p.origen : []).map((o) => ORIGEN_LABEL[o] || o).join(' / ')
 }
@@ -193,10 +199,6 @@ export default function Catalogo() {
       })
   }, [])
 
-  const lista = filtro === TODOS
-    ? productos
-    : productos.filter((p) => p.categoria === filtro)
-
   return (
     <>
       <Seo path="/catalogo" />
@@ -226,16 +228,32 @@ export default function Catalogo() {
           ))}
         </div>
 
-        {/* Rejilla de tarjetas: 4 col desktop, 2 tablet, 1 móvil */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-            gap: 20,
-          }}
-        >
-          {lista.map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
+        {/* Secciones por país de origen */}
+        {PAISES_GRUPOS.map(({ label, keys }) => {
+          const seccion = productos.filter((p) =>
+            Array.isArray(p.origen) && p.origen.some((o) => keys.includes(o)) &&
+            (filtro === TODOS || p.categoria === filtro)
+          )
+          if (seccion.length === 0) return null
+          return (
+            <div key={label}>
+              <div style={{ marginTop: 40, marginBottom: 20, paddingBottom: 10, borderBottom: '2px solid rgba(140,191,63,0.2)' }}>
+                <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', margin: 0, color: '#1D1D1F' }}>
+                  {label}
+                </h2>
+              </div>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                  gap: 20,
+                }}
+              >
+                {seccion.map((p) => <ProductCard key={p.id} product={p} />)}
+              </div>
+            </div>
+          )
+        })}
 
       </div>
 

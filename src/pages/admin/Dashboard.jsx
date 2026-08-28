@@ -85,7 +85,7 @@ export default function Dashboard() {
   // ── Catálogo ──────────────────────────────────────────────────────────────
   useEffect(() => {
     if (!supabaseReady) return
-    supabase.from('productos').select('*').order('categoria')
+    supabase.from('productos').select('*').order('categoria').order('nombre')
       .then(({ data, error }) => { if (!error && data?.length) setProductos(data) })
   }, [])
 
