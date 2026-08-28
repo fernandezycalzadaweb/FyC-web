@@ -70,7 +70,7 @@ function HeroVideo() {
 }
 
 // ── Catálogo preview ──────────────────────────────────────────────────────────
-const PREVIEW_NAMES = ['Anastasia', 'Alstroemeria', 'Rosa Roja', 'Mini Clavel']
+const PREVIEW_NAMES = ['Anastasia/Cremón Natural', 'Alstroemeria', 'Rosa Roja', 'Lilium Oriental']
 
 const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
