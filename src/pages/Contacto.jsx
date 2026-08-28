@@ -235,7 +235,7 @@ export default function Contacto() {
                       name="floristeria"
                       value={form.floristeria}
                       onChange={onChange}
-                      placeholder="Floristería Carmen"
+                      placeholder="Floristería Maribel"
                       required
                       disabled={status === 'loading'}
                     />
