@@ -40,23 +40,11 @@ function IconLightning() {
   )
 }
 
-// ── Carrusel ──────────────────────────────────────────────────────────────────
-const HERO_IMAGES = [
-  { src: '/images/hero/0449.jpg', label: 'Eryngium · Holanda',      position: 'center center' },
-  { src: '/images/hero/0445.jpg', label: 'Poinsetia · Nacional',    position: 'center center' },
-  { src: '/images/hero/0443.jpg', label: 'Alstroemeria · Colombia', position: 'center center' },
-  { src: '/images/hero/0440.jpg', label: 'Clavel · Colombia',       position: 'center 30%' },
-]
-
-function HeroCarousel() {
-  const [current, setCurrent] = useState(0)
-
-  useEffect(() => {
-    if (HERO_IMAGES.length < 2) return
-    const t = setInterval(() => setCurrent((i) => (i + 1) % HERO_IMAGES.length), 3000)
-    return () => clearInterval(t)
-  }, [])
-
+// ── Vídeo hero ────────────────────────────────────────────────────────────────
+// Archivo: public/videos/portada.mp4 (608×1080, vertical 0.563, 8s, sin audio)
+// El contenedor tiene aspectRatio 5/6 (0.833) — más ancho que el vídeo,
+// por lo que object-fit:cover recortará los lados del vídeo manteniendo el centro.
+function HeroVideo() {
   return (
     <div
       style={{
@@ -65,48 +53,18 @@ function HeroCarousel() {
         boxShadow: '0 30px 60px -30px rgba(0,0,0,0.25)',
       }}
     >
-      {HERO_IMAGES.map((img, i) => (
-        <img
-          key={img.src}
-          src={img.src}
-          alt={img.label}
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%', objectFit: 'cover',
-            objectPosition: img.position,
-            opacity: i === current ? 1 : 0,
-            transition: 'opacity 0.9s ease',
-          }}
-        />
-      ))}
-      <div
+      <video
+        src="/videos/portada.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
         style={{
-          position: 'absolute', left: 20, bottom: 20,
-          background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(8px)',
-          padding: '8px 14px', borderRadius: 100, fontSize: 12.5, fontWeight: 600,
-          display: 'flex', alignItems: 'center', gap: 7,
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover', objectPosition: 'center center',
         }}
-      >
-        <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#8A9A63', flexShrink: 0 }} />
-        {HERO_IMAGES[current].label}
-      </div>
-      {HERO_IMAGES.length > 1 && (
-        <div style={{ position: 'absolute', right: 16, bottom: 16, display: 'flex', gap: 5 }}>
-          {HERO_IMAGES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrent(i)}
-              style={{
-                width: i === current ? 18 : 6, height: 6, borderRadius: 100,
-                background: i === current ? '#fff' : 'rgba(255,255,255,0.5)',
-                border: 'none', cursor: 'pointer', padding: 0,
-                transition: 'all 0.3s',
-              }}
-              aria-label={`Imagen ${i + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      />
     </div>
   )
 }
@@ -311,7 +269,7 @@ export default function Home() {
       <Seo path="/" />
 
       {/* ── HERO — dos columnas: texto izquierda, foto derecha ────── */}
-      <header style={{ padding: '80px 0 72px' }}>
+      <header style={{ padding: '40px 0 32px' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
           <div style={{
             display: 'grid',
@@ -341,10 +299,10 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Columna del carrusel — ancho máximo 500px, centrado */}
+            {/* Columna del vídeo — ancho máximo 500px, centrado */}
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div style={{ width: '100%', maxWidth: 500 }}>
-                <HeroCarousel />
+                <HeroVideo />
               </div>
             </div>
 
@@ -353,7 +311,7 @@ export default function Home() {
       </header>
 
       {/* ── STATS ─────────────────────────────────────────────────── */}
-      <section style={{ padding: '72px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
+      <section style={{ padding: '40px 0', borderBottom: '1px solid rgba(0,0,0,0.08)' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
           {STATS.map(({ icon, display, label }) => (
             <div

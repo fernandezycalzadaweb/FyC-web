@@ -18,7 +18,7 @@ function MobileDrawer({ open, onClose }) {
       style={{
         position: 'fixed',
         inset: 0,
-        top: 60,
+        top: 100,
         zIndex: 200,
         background: '#FBFBFD',
         display: 'flex',
@@ -44,7 +44,19 @@ function MobileDrawer({ open, onClose }) {
           {label}
         </NavLink>
       ))}
-      <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+      <div style={{ marginTop: 24, paddingTop: 24, borderTop: '1px solid rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <a
+          href="tel:923182222"
+          style={{
+            fontSize: 17, fontWeight: 600, color: '#6E6E73',
+            textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+          923 18 22 22
+        </a>
         <Link
           to="/contacto"
           onClick={onClose}
@@ -95,7 +107,7 @@ export default function Nav() {
             maxWidth: 1120,
             margin: '0 auto',
             padding: '0 24px',
-            height: 76,
+            height: 100,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -110,7 +122,7 @@ export default function Nav() {
             <img
               src="/logo-fc.png"
               alt="Fernández y Calzada"
-              style={{ height: 56, width: 'auto', display: 'block' }}
+              style={{ height: 76, width: 'auto', display: 'block' }}
             />
           </Link>
 
@@ -131,6 +143,21 @@ export default function Nav() {
                 {label}
               </NavLink>
             ))}
+            <a
+              href="tel:923182222"
+              style={{
+                fontSize: 13, fontWeight: 500, color: '#6E6E73',
+                textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 5,
+                transition: 'color 0.1s',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = '#1D1D1F' }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = '#6E6E73' }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.44 2 2 0 0 1 3.6 1.27h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
+              </svg>
+              923 18 22 22
+            </a>
             <Link to="/contacto" className="btn btn-primary" style={{ fontSize: 13, padding: '8px 18px' }}>
               Contactar
             </Link>
