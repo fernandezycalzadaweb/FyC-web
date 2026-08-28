@@ -49,7 +49,7 @@ function HeroVideo() {
     <div
       style={{
         position: 'relative', borderRadius: 28, overflow: 'hidden',
-        aspectRatio: '5/6',
+        aspectRatio: '7/8',
         boxShadow: '0 30px 60px -30px rgba(0,0,0,0.25)',
       }}
     >
@@ -269,7 +269,7 @@ export default function Home() {
       <Seo path="/" />
 
       {/* ── HERO — dos columnas: texto izquierda, foto derecha ────── */}
-      <header style={{ padding: '40px 0 32px' }}>
+      <header style={{ padding: '28px 0 24px' }}>
         <div style={{ maxWidth: 1120, margin: '0 auto', padding: '0 24px' }}>
           <div style={{
             display: 'grid',
