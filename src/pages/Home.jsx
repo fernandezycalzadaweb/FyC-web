@@ -198,7 +198,7 @@ const ORIGEN_FOTOS = [
 
 function MapSVG() {
   return (
-    <div style={{ borderRadius: 20, overflow: 'hidden', background: 'rgba(140,191,63,0.04)', border: '1px solid rgba(140,191,63,0.12)' }}>
+    <div style={{ borderRadius: 20, overflow: 'hidden', background: '#FAFAF5', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 2px 16px rgba(0,0,0,0.06)' }}>
       <style>{`
         @keyframes rsm-march { to { stroke-dashoffset: -18; } }
       `}</style>
@@ -216,7 +216,7 @@ function MapSVG() {
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill={HIGHLIGHTED.has(geo.id) ? 'rgba(140,191,63,0.60)' : '#F0EDE4'}
+                fill={HIGHLIGHTED.has(geo.id) ? 'rgba(140,191,63,0.60)' : '#DDD5BC'}
                 stroke="#fff"
                 strokeWidth={0.5}
                 style={{ outline: 'none' }}

@@ -127,7 +127,7 @@ export default function QuienesSomos() {
 
         {/* Cita final */}
         <div style={{
-          marginTop: 72,
+          marginTop: 32,
           background: 'rgba(140,191,63,0.07)',
           border: '1px solid rgba(140,191,63,0.2)',
           borderLeft: '4px solid #8CBF3F',

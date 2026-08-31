@@ -8,6 +8,10 @@ import { useCesta } from '../context/CestaContext'
 
 const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
+const IMG_FIT = {
+  '/images/productos/arocorona.jpg': { objectFit: 'contain', padding: '12%' },
+}
+
 function origenStr(p) {
   return (Array.isArray(p.origen) ? p.origen : []).map((o) => ORIGEN_LABEL[o] || o).join(' / ')
 }
@@ -58,7 +62,11 @@ function MiniCard({ product }) {
               src={product.imagen}
               alt={product.nombre}
               onError={() => setImgOk(false)}
-              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+              style={{
+                position: 'absolute', inset: 0, width: '100%', height: '100%',
+                objectFit: IMG_FIT[product.imagen]?.objectFit ?? 'cover',
+                padding: IMG_FIT[product.imagen]?.padding ?? 0,
+              }}
             />
           ) : (
             <div style={{ position: 'absolute', inset: 0, background: s.placeholderBg }} />
@@ -136,7 +144,7 @@ export default function Producto() {
         {/* Layout principal — dos columnas */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: 64,
           alignItems: 'start',
           marginBottom: 80,
@@ -155,7 +163,11 @@ export default function Producto() {
                   src={producto.imagen}
                   alt={producto.nombre}
                   onError={() => setImgOk(false)}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  style={{
+                    width: '100%', height: '100%', display: 'block',
+                    objectFit: IMG_FIT[producto.imagen]?.objectFit ?? 'cover',
+                    padding: IMG_FIT[producto.imagen]?.padding ?? 0,
+                  }}
                 />
               ) : (
                 <div style={{ width: '100%', height: '100%', background: s.placeholderBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
