@@ -40,6 +40,107 @@ function sortSeccionPais(lista) {
 
 const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
+const PASOS = [
+  {
+    titulo: 'Añade lo que te interese',
+    desc: 'Pulsa "+ Añadir" en cualquier variedad del catálogo que quieras consultar.',
+  },
+  {
+    titulo: 'Revisa tu consulta',
+    desc: 'Cuando tengas alguna añadida, verás un aviso abajo con el total — pulsa ahí para ver el resumen.',
+  },
+  {
+    titulo: 'Envíala en un toque',
+    desc: 'Desde ahí puedes mandarnos la consulta completa por WhatsApp o por correo, sin escribir nada a mano.',
+  },
+]
+
+const TUTORIAL_KEY = 'fyc_tutorial_visto'
+
+function TutorialCesta({ onClose }) {
+  const [paso, setPaso] = useState(0)
+  const esUltimo = paso === PASOS.length - 1
+
+  const cerrar = () => {
+    localStorage.setItem(TUTORIAL_KEY, '1')
+    onClose()
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 300,
+      background: 'rgba(0,0,0,0.60)', backdropFilter: 'blur(3px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: 24,
+    }}>
+      <div style={{
+        background: '#fff', borderRadius: 28,
+        boxShadow: '0 32px 80px rgba(0,0,0,0.28)',
+        padding: '36px 32px 28px',
+        maxWidth: 400, width: '100%',
+        position: 'relative',
+      }}>
+
+        <button onClick={cerrar} aria-label="Cerrar tutorial" style={{
+          position: 'absolute', top: 16, right: 16,
+          background: 'rgba(0,0,0,0.06)', border: 'none', borderRadius: '50%',
+          width: 30, height: 30, cursor: 'pointer', color: '#6E6E73',
+          fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>×</button>
+
+        <div style={{
+          width: 52, height: 52, borderRadius: '50%',
+          background: 'rgba(140,191,63,0.12)',
+          border: '2px solid rgba(140,191,63,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginBottom: 20, fontSize: 22, fontWeight: 800, color: '#4A7A34',
+        }}>
+          {paso + 1}
+        </div>
+
+        <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 10px', color: '#1D1D1F' }}>
+          {PASOS[paso].titulo}
+        </h2>
+        <p style={{ fontSize: 15, color: '#3D3D3F', lineHeight: 1.55, margin: '0 0 28px' }}>
+          {PASOS[paso].desc}
+        </p>
+
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 20 }}>
+          {PASOS.map((_, i) => (
+            <div key={i} style={{
+              width: i === paso ? 20 : 7, height: 7, borderRadius: 100,
+              background: i === paso ? '#8CBF3F' : 'rgba(0,0,0,0.12)',
+              transition: 'width 0.2s, background 0.2s',
+            }} />
+          ))}
+        </div>
+
+        <button
+          onClick={() => esUltimo ? cerrar() : setPaso((p) => p + 1)}
+          style={{
+            width: '100%', padding: '13px 20px', borderRadius: 100,
+            background: '#8CBF3F', border: 'none',
+            fontSize: 14, fontWeight: 700, cursor: 'pointer', color: '#fff',
+            marginBottom: 10,
+          }}
+        >
+          {esUltimo ? 'Entendido' : 'Siguiente →'}
+        </button>
+
+        <div style={{ textAlign: 'center' }}>
+          <button onClick={cerrar} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 13, color: '#6E6E73', textDecoration: 'underline', padding: '4px 8px',
+          }}>
+            Saltar tutorial
+          </button>
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 function ProductCard({ product }) {
   const s = CAT_STYLES[product.categoria] ?? CAT_FALLBACK
   const [imgOk, setImgOk] = useState(true)
@@ -193,6 +294,9 @@ function StickyBar() {
 export default function Catalogo() {
   useTrackVisit('/catalogo')
 
+  const [mostrarTutorial, setMostrarTutorial] = useState(
+    () => !localStorage.getItem(TUTORIAL_KEY)
+  )
   const [productos, setProductos] = useState(
     sortProductos(productosStatic.filter((p) => p.visible !== false && p.disponible !== false))
   )
@@ -268,6 +372,7 @@ export default function Catalogo() {
       </div>
 
       <StickyBar />
+      {mostrarTutorial && <TutorialCesta onClose={() => setMostrarTutorial(false)} />}
     </>
   )
 }
