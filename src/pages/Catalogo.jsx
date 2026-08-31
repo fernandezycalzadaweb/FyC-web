@@ -6,11 +6,6 @@ import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
 import { useCesta } from '../context/CestaContext'
 
-// Imágenes con forma ancha o circular que no encajan bien con objectFit:cover vertical
-const IMG_FIT = {
-  '/images/productos/arocorona.jpg': { objectFit: 'contain', padding: '12%' },
-}
-
 const TODOS = 'Todas'
 const FILTROS = [TODOS, ...CATEGORIAS]
 
@@ -74,9 +69,7 @@ function ProductCard({ product }) {
             onError={() => setImgOk(false)}
             style={{
               position: 'absolute', inset: 0,
-              width: '100%', height: '100%',
-              objectFit: IMG_FIT[product.imagen]?.objectFit ?? 'cover',
-              padding: IMG_FIT[product.imagen]?.padding ?? 0,
+              width: '100%', height: '100%', objectFit: 'cover',
             }}
           />
         ) : (
