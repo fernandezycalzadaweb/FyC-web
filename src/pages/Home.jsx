@@ -157,6 +157,45 @@ const RUTAS = [
   { from: [-78.5, -0.2], to: [-3.7, 40.4], delay: '1.2s' },  // Ecuador → España
 ]
 
+const ORIGEN_FOTOS = [
+  {
+    label: 'España',
+    sublabel: 'Género nacional de temporada',
+    fotos: [
+      { src: '/images/productos/girasol.jpg', alt: 'Girasol' },
+      { src: '/images/productos/hortensia.jpg', alt: 'Hortensia' },
+      { src: '/images/productos/eucalipto.jpg', alt: 'Eucalipto' },
+    ],
+  },
+  {
+    label: 'Holanda',
+    sublabel: 'Importación directa',
+    fotos: [
+      { src: '/images/productos/tulipan.jpg', alt: 'Tulipán' },
+      { src: '/images/productos/peonia.jpg', alt: 'Peonía' },
+      { src: '/images/productos/liliumoriental.jpg', alt: 'Lilium oriental' },
+    ],
+  },
+  {
+    label: 'Colombia',
+    sublabel: 'Importación directa',
+    fotos: [
+      { src: '/images/productos/rosaexplorer.jpg', alt: 'Rosa Explorer' },
+      { src: '/images/productos/clavelrojo.jpg', alt: 'Clavel rojo' },
+      { src: '/images/productos/anastasianatural2.jpg', alt: 'Anastasia natural' },
+    ],
+  },
+  {
+    label: 'Ecuador',
+    sublabel: 'Importación directa',
+    fotos: [
+      { src: '/images/productos/rosaexplorer.jpg', alt: 'Rosa Explorer' },
+      { src: '/images/productos/alstroemeria.jpg', alt: 'Alstroemeria' },
+      { src: '/images/productos/anthurium.jpg', alt: 'Anthurium' },
+    ],
+  },
+]
+
 function MapSVG() {
   return (
     <div style={{ borderRadius: 20, overflow: 'hidden', background: 'rgba(140,191,63,0.04)', border: '1px solid rgba(140,191,63,0.12)' }}>
@@ -165,7 +204,7 @@ function MapSVG() {
       `}</style>
       <ComposableMap
         projection="geoMercator"
-        projectionConfig={{ scale: 130, center: [-28, 22] }}
+        projectionConfig={{ scale: 200, center: [-38, 26] }}
         width={800}
         height={400}
         style={{ width: '100%', height: 'auto', display: 'block' }}
@@ -177,7 +216,7 @@ function MapSVG() {
               <Geography
                 key={geo.rsmKey}
                 geography={geo}
-                fill={HIGHLIGHTED.has(geo.id) ? 'rgba(140,191,63,0.55)' : '#D6D6D6'}
+                fill={HIGHLIGHTED.has(geo.id) ? 'rgba(140,191,63,0.60)' : '#F0EDE4'}
                 stroke="#fff"
                 strokeWidth={0.5}
                 style={{ outline: 'none' }}
@@ -434,11 +473,42 @@ export default function Home() {
             <MapSVG />
           </div>
 
-          {/* Lista de países — horizontal, sin cifras */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0 0', borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-            {origenesCounts.map(({ key, label }) => (
-              <div key={key} style={{ flex: '1 1 150px', padding: '16px 0 16px 0', borderBottom: '1px solid rgba(0,0,0,0.08)', marginRight: 32 }}>
-                <span style={{ fontWeight: 600, fontSize: 15 }}>{label}</span>
+          {/* Tarjetas de país con fotos */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(230px, 1fr))',
+            gap: 20,
+            marginTop: 8,
+          }}>
+            {ORIGEN_FOTOS.map(({ label, sublabel, fotos }) => (
+              <div
+                key={label}
+                style={{
+                  background: '#fff',
+                  borderRadius: 16,
+                  border: '1px solid rgba(0,0,0,0.07)',
+                  padding: '18px 18px 22px',
+                  boxShadow: '0 2px 14px rgba(0,0,0,0.06)',
+                }}
+              >
+                <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 3 }}>{label}</div>
+                <div style={{ fontSize: 12.5, color: '#8E8E93', marginBottom: 16 }}>{sublabel}</div>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  {fotos.map(f => (
+                    <img
+                      key={f.alt}
+                      src={f.src}
+                      alt={f.alt}
+                      style={{
+                        width: 64, height: 64,
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        boxShadow: '0 1px 6px rgba(0,0,0,0.10)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             ))}
           </div>
