@@ -257,7 +257,7 @@ export default function Producto() {
         {otrosProductos.length > 0 && (
           <div style={{ borderTop: '1px solid rgba(0,0,0,0.08)', paddingTop: 56 }}>
             <h2 style={{ fontSize: 20, fontWeight: 700, letterSpacing: '-0.02em', margin: '0 0 28px', color: '#1D1D1F' }}>
-              Otros en {producto.categoria}
+              Otras variedades de {producto.categoria}
             </h2>
             <div style={{
               display: 'grid',
