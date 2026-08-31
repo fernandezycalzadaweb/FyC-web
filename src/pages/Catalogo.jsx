@@ -28,6 +28,16 @@ function sortProductos(lista) {
   })
 }
 
+// Dentro de cada sección de país, "Verdes" va siempre al final.
+// El resto mantiene el orden ya establecido por sortProductos.
+function sortSeccionPais(lista) {
+  return [...lista].sort((a, b) => {
+    const aLast = a.categoria === 'Verdes' ? 1 : 0
+    const bLast = b.categoria === 'Verdes' ? 1 : 0
+    return aLast - bLast
+  })
+}
+
 const CAT_FALLBACK = { color: '#6E6E73', pillBg: 'rgba(0,0,0,0.08)', placeholderBg: 'rgba(0,0,0,0.05)' }
 
 function ProductCard({ product }) {
@@ -230,10 +240,10 @@ export default function Catalogo() {
 
         {/* Secciones por país de origen */}
         {PAISES_GRUPOS.map(({ label, keys }) => {
-          const seccion = productos.filter((p) =>
+          const seccion = sortSeccionPais(productos.filter((p) =>
             Array.isArray(p.origen) && p.origen.some((o) => keys.includes(o)) &&
             (filtro === TODOS || p.categoria === filtro)
-          )
+          ))
           if (seccion.length === 0) return null
           return (
             <div key={label}>
