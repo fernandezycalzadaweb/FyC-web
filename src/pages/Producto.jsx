@@ -79,6 +79,8 @@ export default function Producto() {
 
   const [allProductos, setAllProductos] = useState(productosStatic)
   const [imgOk, setImgOk] = useState(true)
+  const { has, toggle } = useCesta()
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     setImgOk(true)
@@ -103,10 +105,7 @@ export default function Producto() {
     )
   }
 
-  const { has, toggle } = useCesta()
   const inCesta = has(producto.nombre)
-
-  const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
     const shareData = {
