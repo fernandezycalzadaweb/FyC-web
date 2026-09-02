@@ -5,6 +5,7 @@ import Seo from '../components/Seo'
 import productosStatic, { CAT_STYLES, ORIGEN_LABEL, toSlug } from '../data/products'
 import { supabase, supabaseReady } from '../lib/supabase'
 import { useTrackVisit } from '../hooks/useTrackVisit'
+import { useCesta } from '../context/CestaContext'
 
 // ── Iconos inline (stroke thin, coherentes) ───────────────────────────────────
 function IconGlobe() {
@@ -271,6 +272,142 @@ function MapSVG() {
   )
 }
 
+// ── Banner newsletter ─────────────────────────────────────────────────────────
+const NEWSLETTER_KEY = 'fyc_newsletter_visto'
+
+function BannerNewsletter() {
+  const { count } = useCesta()
+  const [visible, setVisible] = useState(false)
+  const [email, setEmail] = useState('')
+  const [estado, setEstado] = useState('idle') // idle | enviando | ok | error
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+
+  useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', onResize, { passive: true })
+    return () => window.removeEventListener('resize', onResize)
+  }, [])
+
+  useEffect(() => {
+    if (localStorage.getItem(NEWSLETTER_KEY)) return
+    const t = setTimeout(() => setVisible(true), 2500)
+    return () => clearTimeout(t)
+  }, [])
+
+  if (!visible) return null
+
+  const cerrar = () => {
+    localStorage.setItem(NEWSLETTER_KEY, '1')
+    setVisible(false)
+  }
+
+  const enviar = async (e) => {
+    e.preventDefault()
+    if (!email.trim() || estado === 'enviando' || estado === 'ok') return
+    setEstado('enviando')
+    const { error } = await supabase.from('newsletter_suscriptores').insert({ email: email.trim() })
+    if (error) {
+      setEstado('error')
+    } else {
+      setEstado('ok')
+      localStorage.setItem(NEWSLETTER_KEY, '1')
+      setTimeout(() => setVisible(false), 2500)
+    }
+  }
+
+  return (
+    <>
+      <style>{`
+        @keyframes fyc-slideUp {
+          from { transform: translateY(24px); opacity: 0; }
+          to   { transform: translateY(0);    opacity: 1; }
+        }
+      `}</style>
+      <div style={{
+        position: 'fixed',
+        ...(isMobile
+          ? { bottom: count > 0 ? 64 : 0, left: 0, right: 0 }
+          : { bottom: 24, right: 24, width: 340 }),
+        zIndex: 80,
+        animation: 'fyc-slideUp 0.35s ease',
+      }}>
+        <div style={{
+          background: '#fff',
+          borderRadius: isMobile ? '20px 20px 0 0' : 20,
+          boxShadow: isMobile ? '0 -4px 32px rgba(0,0,0,0.12)' : '0 8px 40px rgba(0,0,0,0.14)',
+          padding: '24px 24px 28px',
+          position: 'relative',
+        }}>
+
+          <button onClick={cerrar} aria-label="Cerrar" style={{
+            position: 'absolute', top: 14, right: 14,
+            background: 'rgba(0,0,0,0.06)', border: 'none', borderRadius: '50%',
+            width: 28, height: 28, cursor: 'pointer', color: '#6E6E73',
+            fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>×</button>
+
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%',
+            background: 'rgba(140,191,63,0.12)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            marginBottom: 14,
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="#4A7A34" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+          </div>
+
+          <h3 style={{
+            fontSize: 16, fontWeight: 800, letterSpacing: '-0.02em',
+            margin: '0 0 8px', color: '#1D1D1F', paddingRight: 24,
+          }}>
+            No te pierdas el género de temporada
+          </h3>
+          <p style={{ fontSize: 13.5, color: '#6E6E73', margin: '0 0 18px', lineHeight: 1.55 }}>
+            Avísanos y te escribimos cuando llega Peonía, Poinsetia y otras variedades de temporada limitada.
+          </p>
+
+          {estado === 'ok' ? (
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#4A7A34', margin: 0 }}>
+              ¡Gracias! Te avisaremos cuando llegue.
+            </p>
+          ) : (
+            <form onSubmit={enviar} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <input
+                type="email" required placeholder="tu@floristeria.com"
+                value={email} onChange={(e) => setEmail(e.target.value)}
+                style={{
+                  padding: '10px 14px', borderRadius: 100, fontSize: 13.5,
+                  border: '1.5px solid rgba(0,0,0,0.14)', outline: 'none',
+                  background: '#FAFAF9', width: '100%', boxSizing: 'border-box',
+                }}
+                onFocus={(e) => (e.target.style.borderColor = '#8CBF3F')}
+                onBlur={(e)  => (e.target.style.borderColor = 'rgba(0,0,0,0.14)')}
+              />
+              <button type="submit" disabled={estado === 'enviando'} style={{
+                padding: '11px 20px', borderRadius: 100,
+                background: '#8CBF3F', border: 'none',
+                fontSize: 13.5, fontWeight: 700,
+                cursor: estado === 'enviando' ? 'default' : 'pointer',
+                color: '#fff', opacity: estado === 'enviando' ? 0.7 : 1,
+              }}>
+                {estado === 'enviando' ? 'Enviando…' : 'Avisadme'}
+              </button>
+              {estado === 'error' && (
+                <p style={{ fontSize: 12.5, color: '#C0392B', margin: 0, textAlign: 'center' }}>
+                  Algo ha ido mal. Inténtalo de nuevo.
+                </p>
+              )}
+            </form>
+          )}
+        </div>
+      </div>
+    </>
+  )
+}
+
 // ── Página ────────────────────────────────────────────────────────────────────
 export default function Home() {
   useTrackVisit('/')
@@ -514,6 +651,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <BannerNewsletter />
     </>
   )
 }
