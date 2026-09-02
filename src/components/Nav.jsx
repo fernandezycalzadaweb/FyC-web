@@ -166,10 +166,10 @@ export default function Nav() {
           {/* Teléfono — solo visible en móvil */}
           <a
             href="tel:923182222"
-            className="md:hidden"
+            className="md:hidden flex items-center gap-1.5"
             style={{
               fontSize: 13, fontWeight: 600, color: '#6E6E73',
-              textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 6,
+              textDecoration: 'none',
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
