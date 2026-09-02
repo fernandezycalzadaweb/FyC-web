@@ -164,7 +164,7 @@ const ORIGEN_FOTOS = [
     sublabel: 'Género nacional de temporada',
     fotos: [
       { src: '/images/productos/girasol.jpg', alt: 'Girasol' },
-      { src: '/images/productos/hortensia.jpg', alt: 'Hortensia' },
+      { src: '/images/productos/camelia2.jpg', alt: 'Camelia' },
       { src: '/images/productos/eucalipto.jpg', alt: 'Eucalipto' },
     ],
   },
@@ -192,7 +192,7 @@ const ORIGEN_FOTOS = [
     fotos: [
       { src: '/images/productos/rosaexplorer.jpg', alt: 'Rosa Explorer' },
       { src: '/images/productos/alstroemeria.jpg', alt: 'Alstroemeria' },
-      { src: '/images/productos/anthurium.jpg', alt: 'Anthurium' },
+      { src: '/images/productos/paniculata.jpg', alt: 'Paniculata' },
     ],
   },
 ]
