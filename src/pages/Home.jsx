@@ -290,8 +290,21 @@ function BannerNewsletter() {
 
   useEffect(() => {
     if (localStorage.getItem(NEWSLETTER_KEY)) return
-    const t = setTimeout(() => setVisible(true), 2500)
-    return () => clearTimeout(t)
+    let fired = false
+    const trigger = () => {
+      if (fired) return
+      fired = true
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(fallback)
+      setVisible(true)
+    }
+    const onScroll = () => { if (window.scrollY > 400) trigger() }
+    const fallback = setTimeout(trigger, 8000)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      clearTimeout(fallback)
+    }
   }, [])
 
   if (!visible) return null
@@ -333,9 +346,9 @@ function BannerNewsletter() {
       }}>
         <div style={{
           background: '#fff',
-          borderRadius: isMobile ? '20px 20px 0 0' : 20,
-          boxShadow: isMobile ? '0 -4px 32px rgba(0,0,0,0.12)' : '0 8px 40px rgba(0,0,0,0.14)',
-          padding: '24px 24px 28px',
+          borderRadius: isMobile ? '20px 20px 0 0' : 24,
+          boxShadow: isMobile ? '0 -4px 32px rgba(0,0,0,0.12)' : '0 12px 48px rgba(0,0,0,0.16)',
+          padding: '28px 26px 30px',
           position: 'relative',
         }}>
 
@@ -347,15 +360,18 @@ function BannerNewsletter() {
           }}>×</button>
 
           <div style={{
-            width: 40, height: 40, borderRadius: '50%',
+            width: 44, height: 44, borderRadius: '50%',
             background: 'rgba(140,191,63,0.12)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            marginBottom: 14,
+            marginBottom: 16,
           }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                 stroke="#4A7A34" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            <svg width="22" height="22" viewBox="0 0 24 24">
+              {[0, 72, 144, 216, 288].map((deg) => (
+                <ellipse key={deg} cx="12" cy="6.5" rx="2.5" ry="4"
+                  fill="rgba(74,122,52,0.28)" stroke="#4A7A34" strokeWidth="1.2"
+                  transform={`rotate(${deg} 12 12)`} />
+              ))}
+              <circle cx="12" cy="12" r="3" fill="#8CBF3F" />
             </svg>
           </div>
 
@@ -400,6 +416,9 @@ function BannerNewsletter() {
                   Algo ha ido mal. Inténtalo de nuevo.
                 </p>
               )}
+              <p style={{ fontSize: 11.5, color: '#8A8A8E', margin: '2px 0 0', textAlign: 'center' }}>
+                Sin spam, solo avisos puntuales de temporada.
+              </p>
             </form>
           )}
         </div>
