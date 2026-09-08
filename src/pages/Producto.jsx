@@ -137,11 +137,22 @@ export default function Producto() {
     <>
       <Seo title={seoTitle} description={seoDesc} path={`/catalogo/${slug}`} />
 
-      <div style={{ maxWidth: 1120, margin: '0 auto', padding: '48px 24px 96px' }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .fyc-prod-container { padding: 20px 20px 96px !important; }
+          .fyc-prod-back      { margin-bottom: 16px !important; }
+          .fyc-prod-grid      { gap: 20px !important; }
+          .fyc-prod-img       { aspect-ratio: 4/3 !important; }
+          .fyc-prod-col-text  { padding-top: 0 !important; }
+        }
+      `}</style>
+
+      <div className="fyc-prod-container" style={{ maxWidth: 1120, margin: '0 auto', padding: '48px 24px 96px' }}>
 
         {/* Volver */}
         <Link
           to="/catalogo"
+          className="fyc-prod-back"
           style={{ fontSize: 13.5, color: '#6E6E73', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 48 }}
           onMouseEnter={(e) => (e.currentTarget.style.color = '#1D1D1F')}
           onMouseLeave={(e) => (e.currentTarget.style.color = '#6E6E73')}
@@ -150,7 +161,7 @@ export default function Producto() {
         </Link>
 
         {/* Layout principal — dos columnas */}
-        <div style={{
+        <div className="fyc-prod-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: 64,
@@ -160,7 +171,7 @@ export default function Producto() {
 
           {/* Columna izquierda — imagen */}
           <div style={{ position: 'relative' }}>
-            <div style={{
+            <div className="fyc-prod-img" style={{
               borderRadius: 28, overflow: 'hidden',
               aspectRatio: '4/5',
               background: s.placeholderBg,
@@ -192,7 +203,7 @@ export default function Producto() {
           </div>
 
           {/* Columna derecha — info */}
-          <div style={{ paddingTop: 8 }}>
+          <div className="fyc-prod-col-text" style={{ paddingTop: 8 }}>
 
             {/* Nombre */}
             <h1 style={{
